@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Social Media Dashboard</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="page">
+      <header class="topbar">
+        <div>
+          <p>Overview</p>
+          <h1>Social Media Dashboard</h1>
+        </div>
+
+        <div class="toolbar">
+          <label for="platformFilter">Platform</label>
+          <select id="platformFilter" aria-label="Filter by platform">
+            <option value="all">All Platforms</option>
+          </select>
+        </div>
+      </header>
+
+      <section class="stats" aria-label="Summary metrics">
+        <article class="card highlight">
+          <p class="card-label">Total Followers</p>
+          <p id="followersValue" class="card-value">0</p>
+        </article>
+
+        <article class="card">
+          <p class="card-label">Total Likes</p>
+          <p id="likesValue" class="card-value">0</p>
+        </article>
+
+        <article class="card">
+          <p class="card-label">Engagement Rate</p>
+          <p id="engagementValue" class="card-value">0%</p>
+        </article>
+
+        <article class="card">
+          <p class="card-label">Top Platform</p>
+          <p id="topPlatformValue" class="card-value">-</p>
+        </article>
+      </section>
+
+      <section class="main-grid">
+        <article class="panel">
+          <div class="panel-header">
+            <h2>Followers by Platform</h2>
+          </div>
+          <div id="barChart" class="chart-box" aria-label="Bar chart showing followers by platform"></div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-header">
+            <h2>Audience Share</h2>
+          </div>
+          <div class="donut-wrap">
+            <div id="donutChart" class="chart-box" aria-label="Donut chart showing audience share"></div>
+            <ul id="legend" class="legend" aria-label="Platform legend"></ul>
+          </div>
+        </article>
+      </section>
+
+      <section class="panel table-box">
+        <div class="panel-header">
+          <h2>Performance Table</h2>
+        </div>
+
+        <table aria-label="Platform performance table">
+          <thead>
+            <tr>
+              <th>Platform</th>
+              <th>Followers</th>
+              <th>Likes</th>
+              <th>Engagement</th>
+            </tr>
+          </thead>
+          <tbody id="performanceTable"></tbody>
+        </table>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
