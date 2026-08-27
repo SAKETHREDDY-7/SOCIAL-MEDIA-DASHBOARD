@@ -138,6 +138,11 @@ select {
   min-height: 330px;
 }
 
+#donutChart {
+  width: auto;
+  min-height: unset;
+}
+
 .donut-wrap {
   display: flex;
   align-items: center;
@@ -172,6 +177,7 @@ select {
 
 .table-box {
   margin-top: 18px;
+  overflow-x: auto;
 }
 
 table {
@@ -195,6 +201,14 @@ th {
 
 td {
   font-size: 14px;
+}
+
+tbody tr {
+  transition: background-color 0.15s ease;
+}
+
+tbody tr:hover {
+  background-color: rgba(79, 70, 229, 0.04);
 }
 
 @media (max-width: 860px) {
