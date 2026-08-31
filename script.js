@@ -1,10 +1,10 @@
 const platformColors = {
-  Instagram: "#4f46e5",
-  Facebook: "#06b6d4",
-  Twitter: "#f59e0b",
-  LinkedIn: "#22c55e",
-  TikTok: "#ec4899",
-  YouTube: "#ef4444"
+  Instagram: "#170cf5",
+  Facebook: "#2cddfc",
+  Twitter: "#ffa200",
+  LinkedIn: "#1edf65",
+  TikTok: "#ff0f87",
+  YouTube: "#ee0000"
 };
 
 const platformFilter = document.getElementById("platformFilter");
