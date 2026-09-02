@@ -16,10 +16,21 @@
         </div>
 
         <div class="toolbar">
-          <label for="platformFilter">Platform</label>
-          <select id="platformFilter" aria-label="Filter by platform">
-            <option value="all">All Platforms</option>
-          </select>
+          <div class="toolbar-group">
+            <label for="platformFilter">Platform</label>
+            <select id="platformFilter" aria-label="Filter by platform">
+              <option value="all">All Platforms</option>
+            </select>
+          </div>
+
+          <div class="toolbar-group compact">
+            <label>View</label>
+            <div class="segmented-control" id="metricToggle" aria-label="Metric toggle">
+              <button class="metric-btn active" type="button" data-metric="followers">Followers</button>
+              <button class="metric-btn" type="button" data-metric="likes">Likes</button>
+              <button class="metric-btn" type="button" data-metric="engagement">Engagement</button>
+            </div>
+          </div>
         </div>
       </header>
 
