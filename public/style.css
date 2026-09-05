@@ -20,6 +20,44 @@ body {
   color: var(--text);
 }
 
+.chart-tooltip {
+  position: fixed;
+  z-index: 10;
+  display: grid;
+  gap: 4px;
+  min-width: 170px;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  background: rgba(23, 32, 51, 0.96);
+  color: white;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.2);
+  font-size: 12px;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.chart-tooltip.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.chart-tooltip strong {
+  margin-bottom: 2px;
+  font-size: 14px;
+}
+
+.chart-tooltip em {
+  color: #8de7c0;
+  font-style: normal;
+}
+
+.chart-tooltip span {
+  color: rgba(255, 255, 255, 0.72);
+}
+
 .page {
   max-width: 1200px;
   margin: 32px auto;
@@ -155,6 +193,110 @@ select:focus {
   letter-spacing: -0.05em;
 }
 
+.platform-spotlight {
+  display: grid;
+  grid-template-columns: minmax(220px, 1.2fr) 1.8fr minmax(220px, 1fr);
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 24px;
+  padding: 20px 22px;
+  background: linear-gradient(110deg, #172033, #273552);
+  border-radius: 18px;
+  color: white;
+  box-shadow: 0 16px 35px rgba(23, 32, 51, 0.16);
+}
+
+.spotlight-heading h2,
+.spotlight-heading p {
+  margin: 0;
+}
+
+.spotlight-heading h2 {
+  font-size: 1.35rem;
+}
+
+.spotlight-heading > p:last-child {
+  max-width: 360px;
+  margin-top: 6px;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.eyebrow {
+  margin-bottom: 8px !important;
+  color: #8de7c0;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.spotlight-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.spotlight-metric {
+  min-width: 0;
+  padding: 13px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.spotlight-metric span,
+.spotlight-bar-label {
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 11px;
+}
+
+.spotlight-metric strong {
+  display: block;
+  margin-top: 7px;
+  font-size: 1.2rem;
+}
+
+.spotlight-metric small {
+  display: block;
+  min-height: 30px;
+  margin-top: 4px;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.spotlight-metric .progress-track {
+  margin-top: 12px;
+}
+
+.spotlight-bar-label {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 9px;
+}
+
+.spotlight-bar-label strong {
+  color: white;
+}
+
+.progress-track {
+  height: 9px;
+  overflow: hidden;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.progress-track span {
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  transition: width 0.5s ease;
+}
+
 .main-grid {
   display: grid;
   grid-template-columns: 1.5fr 1fr;
@@ -179,6 +321,54 @@ select:focus {
 .panel-header h2 {
   margin: 0;
   font-size: 1.1rem;
+}
+
+.chart-subtitle {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.chart-mode-toggle {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+.chart-mode-btn {
+  border: 0;
+  border-radius: 7px;
+  padding: 7px 9px;
+  color: var(--muted);
+  background: transparent;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.chart-mode-btn.active {
+  color: white;
+  background: var(--primary);
+}
+
+.chart-mode-btn.reset-btn {
+  color: var(--primary);
+  background: var(--primary-soft);
+}
+
+.chart-mode-btn.reset-btn:hover,
+.chart-mode-btn.reset-btn:focus-visible {
+  color: white;
+  background: var(--primary);
+  outline: none;
+}
+
+.chart-mode-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
 }
 
 .chart-box {
@@ -279,6 +469,17 @@ tbody tr.is-selected {
   stroke-width: 2;
 }
 
+.segment-bar {
+  cursor: help;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.segment-bar:hover {
+  opacity: 0.8;
+  stroke: rgba(23, 32, 51, 0.6);
+  stroke-width: 2;
+}
+
 .legend li {
   transition: transform 0.2s ease, opacity 0.2s ease;
 }
@@ -306,6 +507,10 @@ tbody tr.is-selected {
     grid-template-columns: 1fr;
   }
 
+  .platform-spotlight {
+    grid-template-columns: 1fr;
+  }
+
   .donut-wrap {
     flex-direction: column;
   }
@@ -318,5 +523,15 @@ tbody tr.is-selected {
 
   .stats {
     grid-template-columns: 1fr;
+  }
+
+  .spotlight-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .panel-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
   }
 }

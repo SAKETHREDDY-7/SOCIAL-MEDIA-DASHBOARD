@@ -56,17 +56,54 @@
         </article>
       </section>
 
+      <section id="platformSpotlight" class="platform-spotlight" aria-live="polite">
+        <div class="spotlight-heading">
+          <p class="eyebrow">Platform spotlight</p>
+          <h2 id="spotlightTitle">Select a platform to see more</h2>
+          <p id="spotlightDescription">Choose a platform from the filter, chart, legend, or table to inspect its performance.</p>
+        </div>
+        <div id="spotlightMetrics" class="spotlight-metrics" hidden>
+          <div class="spotlight-metric followers-detail">
+            <span>Followers</span>
+            <strong id="spotlightFollowers">-</strong>
+            <small id="spotlightFollowersContext">-</small>
+            <div class="progress-track"><span id="spotlightFollowersBar"></span></div>
+          </div>
+          <div class="spotlight-metric likes-detail">
+            <span>Likes</span>
+            <strong id="spotlightLikes">-</strong>
+            <small id="spotlightLikesContext">-</small>
+            <div class="progress-track"><span id="spotlightLikesBar"></span></div>
+          </div>
+          <div class="spotlight-metric engagement-detail">
+            <span>Engagement</span>
+            <strong id="spotlightEngagement">-</strong>
+            <small id="spotlightEngagementContext">-</small>
+            <div class="progress-track"><span id="spotlightEngagementBar"></span></div>
+          </div>
+        </div>
+      </section>
+
       <section class="main-grid">
         <article class="panel">
           <div class="panel-header">
-            <h2>Followers by Platform</h2>
+            <div>
+              <h2 id="barChartTitle">Followers by Platform</h2>
+              <p id="barChartSubtitle" class="chart-subtitle">Compare your audience across platforms</p>
+            </div>
+            <div class="chart-mode-toggle" aria-label="Chart view">
+              <button id="platformChartMode" class="chart-mode-btn active" type="button">Platforms</button>
+              <button id="audienceChartMode" class="chart-mode-btn" type="button" disabled>Audience mix</button>
+              <button id="allPlatformsBtn" class="chart-mode-btn reset-btn" type="button" hidden>All platforms</button>
+            </div>
           </div>
           <div id="barChart" class="chart-box" aria-label="Bar chart showing followers by platform"></div>
         </article>
 
         <article class="panel">
           <div class="panel-header">
-            <h2>Audience Share</h2>
+            <h2 id="donutChartTitle">Audience Share</h2>
+            <p id="donutChartSubtitle" class="chart-subtitle">Share of followers across platforms</p>
           </div>
           <div class="donut-wrap">
             <div id="donutChart" class="chart-box" aria-label="Donut chart showing audience share"></div>
@@ -93,6 +130,8 @@
         </table>
       </section>
     </main>
+
+    <div id="chartTooltip" class="chart-tooltip" role="status" aria-live="polite"></div>
 
     <script src="script.js"></script>
   </body>
