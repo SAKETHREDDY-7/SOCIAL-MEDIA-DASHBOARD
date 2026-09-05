@@ -58,6 +58,28 @@ body {
   color: rgba(255, 255, 255, 0.72);
 }
 
+.donut-center {
+  pointer-events: none;
+}
+
+.donut-center-background {
+  fill: #ffffff;
+  stroke-width: 5;
+  stroke-opacity: 0.22;
+}
+
+.donut-center-title,
+.donut-center-subtitle {
+  fill: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.donut-center-value {
+  font-size: 20px;
+  font-weight: 800;
+}
+
 .page {
   max-width: 1200px;
   margin: 32px auto;

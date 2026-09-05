@@ -284,6 +284,31 @@ function audienceTooltip(platform, segment, share) {
   return platformTooltip(item, `<em>${segment}: ${share}% (estimated)</em>`);
 }
 
+function addDonutCenter(svg, title, value, subtitle, accent = "#4f46e5") {
+  const center = svg.append("g")
+    .attr("class", "donut-center")
+    .attr("text-anchor", "middle");
+
+  center.append("circle")
+    .attr("class", "donut-center-background")
+    .attr("r", 58)
+    .style("stroke", accent);
+
+  center.append("text")
+    .attr("class", "donut-center-title")
+    .attr("y", -18)
+    .text(title);
+  center.append("text")
+    .attr("class", "donut-center-value")
+    .attr("y", 8)
+    .style("fill", accent)
+    .text(value);
+  center.append("text")
+    .attr("class", "donut-center-subtitle")
+    .attr("y", 28)
+    .text(subtitle);
+}
+
 function renderBarChart(data) {
   const container = document.getElementById("barChart");
   container.innerHTML = "";
@@ -433,6 +458,14 @@ function renderDonutChart(data) {
 
   const arcs = pie(data);
 
+  addDonutCenter(
+    svg,
+    "Total audience",
+    formatNumber(d3.sum(data, item => Number(item.followers))),
+    "followers",
+    "#4f46e5"
+  );
+
   svg.selectAll("path")
     .data(arcs)
     .enter()
@@ -498,6 +531,15 @@ function renderAudienceDonut(container, platform) {
   const arc = d3.arc()
     .innerRadius(radius * 0.55)
     .outerRadius(radius);
+
+  const selected = platformData.find(item => item.platform === platform);
+  addDonutCenter(
+    svg,
+    platform,
+    formatNumber(Number(selected.followers)),
+    "followers",
+    platformColors[platform] || "#4f46e5"
+  );
 
   svg.selectAll("path")
     .data(pie(audienceData))
