@@ -9,7 +9,7 @@
   </head>
   <body>
     <main class="page">
-      <header class="topbar">
+       <header class="topbar">
         <div>
           <p>Overview</p>
           <h1>Social Media Dashboard</h1>
@@ -22,6 +22,17 @@
               <option value="all">All Platforms</option>
             </select>
           </div>
+
+          <div class="toolbar-group">
+            <label for="sortMetric">Sort</label>
+            <select id="sortMetric" aria-label="Sort platforms">
+              <option value="followers">Followers</option>
+              <option value="likes">Likes</option>
+              <option value="engagement">Engagement</option>
+            </select>
+          </div>
+
+          <button id="sortDirectionBtn" class="sort-direction-btn" type="button" aria-label="Toggle sorting direction">Descending ↑</button>
 
           <div class="toolbar-group compact">
             <label>View</label>
@@ -53,6 +64,24 @@
         <article class="card">
           <p class="card-label">Top Platform</p>
           <p id="topPlatformValue" class="card-value">-</p>
+        </article>
+      </section>
+
+      <section class="insight-strip" aria-label="Key performance insights">
+        <article class="insight-card">
+          <span class="insight-label">Best performer</span>
+          <strong id="bestPerformerValue">-</strong>
+          <small id="bestPerformerMeta">-</small>
+        </article>
+        <article class="insight-card">
+          <span class="insight-label">Top engagement</span>
+          <strong id="engagementLeaderValue">-</strong>
+          <small id="engagementLeaderMeta">-</small>
+        </article>
+        <article class="insight-card">
+          <span class="insight-label">Most likes</span>
+          <strong id="likesLeaderValue">-</strong>
+          <small id="likesLeaderMeta">-</small>
         </article>
       </section>
 
