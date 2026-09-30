@@ -1,166 +1,402 @@
-<!DOCTYPE html>
-<html lang="en">
+﻿<!DOCTYPE html>
+<html lang="en" data-theme="light">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Social Media Dashboard</title>
-    <script src="https://d3js.org/d3.v7.min.js"></script>
+
+    <!-- Prevent flash of wrong theme -->
+    <script>
+      (function () {
+        var t =
+          localStorage.getItem("smd-theme") ||
+          (window.matchMedia("(prefers-color-scheme: dark)").matches
+            ? "dark"
+            : "light");
+        document.documentElement.setAttribute("data-theme", t);
+      })(); 
+    </script>
+
+    <script src="d3.v7.min.js"></script>
+    <script>
+      if (typeof d3 === "undefined") {
+        document.write('<script src="https://d3js.org/d3.v7.min.js"><\/script>');
+      }
+    </script>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <main class="page">
-       <header class="topbar">
-        <div>
-          <p>Overview</p>
-          <h1>Social Media Dashboard</h1>
+    <!-- ── Toast Container ──────────────────────── -->
+    <div
+      id="toastContainer"
+      class="toast-container"
+      aria-live="polite"
+      aria-atomic="false"
+    ></div>
+
+    <!-- ── Loading Skeleton ─────────────────────── -->
+    <div id="loadingSkeleton" class="loading-skeleton">
+      <div class="skel skel-header"></div>
+      <div class="skel-row skel-cards-row">
+        <div class="skel skel-card"></div>
+        <div class="skel skel-card"></div>
+        <div class="skel skel-card"></div>
+        <div class="skel skel-card"></div>
+        <div class="skel skel-card"></div>
+      </div>
+      <div class="skel skel-strip"></div>
+      <div class="skel skel-spotlight"></div>
+      <div class="skel-row skel-charts-row">
+        <div class="skel skel-chart"></div>
+        <div class="skel skel-chart-sm"></div>
+      </div>
+      <div class="skel skel-trend"></div>
+      <div class="skel skel-table"></div>
+    </div>
+
+    <!-- ── Error Banner ─────────────────────────── -->
+    <div id="errorBanner" class="error-banner" hidden>
+      <span class="error-icon" aria-hidden="true">⚠️</span>
+      <div class="error-body">
+        <strong>Could not load dashboard data</strong>
+        <p>
+          Make sure <code>data.csv</code> is served alongside this page (e.g.
+          via a local web server, not file://).
+        </p>
+      </div>
+      <button id="retryBtn" class="retry-btn" type="button">Retry</button>
+    </div>
+
+    <!-- ── Main Content ─────────────────────────── -->
+    <main class="page" id="mainContent" hidden>
+      <!-- Header -->
+      <header class="topbar">
+        <div class="brand">
+          <span class="brand-eyebrow">Overview</span>
+          <h1 class="brand-title">Social Media Dashboard</h1>
         </div>
 
-        <div class="toolbar">
-          <div class="toolbar-group">
-            <label for="platformFilter">Platform</label>
-            <select id="platformFilter" aria-label="Filter by platform">
-              <option value="all">All Platforms</option>
-            </select>
+        <div class="topbar-actions">
+          <!-- Date Range Picker -->
+          <div class="date-range" role="group" aria-label="Select time period">
+            <button class="date-btn active" data-period="7d" type="button">
+              7D
+            </button>
+            <button class="date-btn" data-period="30d" type="button">30D</button>
+            <button class="date-btn" data-period="90d" type="button">90D</button>
           </div>
 
-          <div class="toolbar-group">
-            <label for="sortMetric">Sort</label>
-            <select id="sortMetric" aria-label="Sort platforms">
-              <option value="followers">Followers</option>
-              <option value="likes">Likes</option>
-              <option value="engagement">Engagement</option>
-            </select>
-          </div>
-
-          <button id="sortDirectionBtn" class="sort-direction-btn" type="button" aria-label="Toggle sorting direction">Descending ↑</button>
-
-          <div class="toolbar-group compact">
-            <label>View</label>
-            <div class="segmented-control" id="metricToggle" aria-label="Metric toggle">
-              <button class="metric-btn active" type="button" data-metric="followers">Followers</button>
-              <button class="metric-btn" type="button" data-metric="likes">Likes</button>
-              <button class="metric-btn" type="button" data-metric="engagement">Engagement</button>
-            </div>
-          </div>
+          <!-- Dark Mode Toggle -->
+          <button
+            id="themeToggle"
+            class="theme-toggle"
+            type="button"
+            aria-label="Toggle dark mode"
+            title="Toggle dark/light mode"
+          >
+            <span id="themeIcon">🌙</span>
+          </button>
         </div>
       </header>
 
-      <section class="stats" aria-label="Summary metrics">
-        <article class="card highlight">
+      <!-- ── Summary Cards ─────────────────────── -->
+      <section class="stats" aria-label="Summary statistics">
+        <article class="card card--highlight">
+          <div class="card-icon" aria-hidden="true">👥</div>
           <p class="card-label">Total Followers</p>
-          <p id="followersValue" class="card-value">0</p>
+          <p class="card-value" id="followersValue">–</p>
         </article>
 
         <article class="card">
+          <div class="card-icon" aria-hidden="true">❤️</div>
           <p class="card-label">Total Likes</p>
-          <p id="likesValue" class="card-value">0</p>
+          <p class="card-value" id="likesValue">–</p>
+        </
+        article>
+
+        <article class="card">
+          <div class="card-icon" aria-hidden="true">📊</div>
+          <p class="card-label">Avg Engagement</p>
+          <p class="card-value" id="engagementValue">–</p>
         </article>
 
         <article class="card">
-          <p class="card-label">Engagement Rate</p>
-          <p id="engagementValue" class="card-value">0%</p>
+          <div class="card-icon" aria-hidden="true">📡</div>
+          <p class="card-label">Total Reach</p>
+          <p class="card-value" id="reachValue">–</p>
         </article>
 
         <article class="card">
+          <div class="card-icon" aria-hidden="true">🏆</div>
           <p class="card-label">Top Platform</p>
-          <p id="topPlatformValue" class="card-value">-</p>
+          <p class="card-value card-value--sm" id="topPlatformValue">–</p>
         </article>
       </section>
 
-      <section class="insight-strip" aria-label="Key performance insights">
+      <!-- ── Insights Strip ────────────────────── -->
+      <section class="insight-strip" aria-label="Key insights">
         <article class="insight-card">
-          <span class="insight-label">Best performer</span>
-          <strong id="bestPerformerValue">-</strong>
-          <small id="bestPerformerMeta">-</small>
+          <span class="insight-label">🥇 Best performer</span>
+          <strong id="bestPerformerValue">–</strong>
+          <small id="bestPerformerMeta">–</small>
         </article>
         <article class="insight-card">
-          <span class="insight-label">Top engagement</span>
-          <strong id="engagementLeaderValue">-</strong>
-          <small id="engagementLeaderMeta">-</small>
+          <span class="insight-label">📈 Top engagement</span>
+          <strong id="engagementLeaderValue">–</strong>
+          <small id="engagementLeaderMeta">–</small>
         </article>
         <article class="insight-card">
-          <span class="insight-label">Most likes</span>
-          <strong id="likesLeaderValue">-</strong>
-          <small id="likesLeaderMeta">-</small>
+          <span class="insight-label">❤️ Most liked</span>
+          <strong id="likesLeaderValue">–</strong>
+          <small id="likesLeaderMeta">–</small>
+        </article>
+        <article class="insight-card">
+          <span class="insight-label">📡 Most reach</span>
+          <strong id="reachLeaderValue">–</strong>
+          <small id="reachLeaderMeta">–</small>
         </article>
       </section>
 
-      <section id="platformSpotlight" class="platform-spotlight" aria-live="polite">
+      <!-- ── Platform Spotlight ─────────────────── -->
+      <section
+        id="platformSpotlight"
+        class="platform-spotlight"
+        aria-live="polite"
+        aria-label="Platform spotlight"
+      >
         <div class="spotlight-heading">
           <p class="eyebrow">Platform spotlight</p>
-          <h2 id="spotlightTitle">Select a platform to see more</h2>
-          <p id="spotlightDescription">Choose a platform from the filter, chart, legend, or table to inspect its performance.</p>
+          <h2 id="spotlightTitle">Select a platform</h2>
+          <p id="spotlightDescription">
+            Click any bar, donut slice, legend item, or table row to see a
+            detailed breakdown.
+          </p>
         </div>
+
         <div id="spotlightMetrics" class="spotlight-metrics" hidden>
-          <div class="spotlight-metric followers-detail">
-            <span>Followers</span>
-            <strong id="spotlightFollowers">-</strong>
-            <small id="spotlightFollowersContext">-</small>
-            <div class="progress-track"><span id="spotlightFollowersBar"></span></div>
+          <div class="spotlight-metric">
+            <span class="spotlight-metric-label">Followers</span>
+            <strong id="spotlightFollowers">–</strong>
+            <small id="spotlightFollowersContext">–</small>
+            <div class="progress-track">
+              <span id="spotlightFollowersBar" class="progress-fill"></span>
+            </div>
           </div>
-          <div class="spotlight-metric likes-detail">
-            <span>Likes</span>
-            <strong id="spotlightLikes">-</strong>
-            <small id="spotlightLikesContext">-</small>
-            <div class="progress-track"><span id="spotlightLikesBar"></span></div>
+          <div class="spotlight-metric">
+            <span class="spotlight-metric-label">Likes</span>
+            <strong id="spotlightLikes">–</strong>
+            <small id="spotlightLikesContext">–</small>
+            <div class="progress-track">
+              <span id="spotlightLikesBar" class="progress-fill"></span>
+            </div>
           </div>
-          <div class="spotlight-metric engagement-detail">
-            <span>Engagement</span>
-            <strong id="spotlightEngagement">-</strong>
-            <small id="spotlightEngagementContext">-</small>
-            <div class="progress-track"><span id="spotlightEngagementBar"></span></div>
+          <div class="spotlight-metric">
+            <span class="spotlight-metric-label">Engagement</span>
+            <strong id="spotlightEngagement">–</strong>
+            <small id="spotlightEngagementContext">–</small>
+            <div class="progress-track">
+              <span id="spotlightEngagementBar" class="progress-fill"></span>
+            </div>
+          </div>
+          <div class="spotlight-metric">
+            <span class="spotlight-metric-label">Reach</span>
+            <strong id="spotlightReach">–</strong>
+            <small id="spotlightReachContext">–</small>
+            <div class="progress-track">
+              <span id="spotlightReachBar" class="progress-fill"></span>
+            </div>
           </div>
         </div>
       </section>
 
-      <section class="main-grid">
+      <!-- ── Charts Grid ────────────────────────── -->
+      <div class="main-grid">
+        <!-- Bar Chart -->
         <article class="panel">
           <div class="panel-header">
             <div>
               <h2 id="barChartTitle">Followers by Platform</h2>
-              <p id="barChartSubtitle" class="chart-subtitle">Compare your audience across platforms</p>
+              <p class="chart-subtitle" id="barChartSubtitle">
+                Compare your audience across platforms
+              </p>
             </div>
-            <div class="chart-mode-toggle" aria-label="Chart view">
-              <button id="platformChartMode" class="chart-mode-btn active" type="button">Platforms</button>
-              <button id="audienceChartMode" class="chart-mode-btn" type="button" disabled>Audience mix</button>
-              <button id="allPlatformsBtn" class="chart-mode-btn reset-btn" type="button" hidden>All platforms</button>
+            <div class="toolbar-right">
+              <span class="toolbar-label">Chart metric</span>
+              <div
+                class="segmented-control"
+                id="metricToggle"
+                aria-label="Select metric for bar chart"
+              >
+                <button
+                  class="metric-btn active"
+                  data-metric="followers"
+                  type="button"
+                >
+                  Followers
+                </button>
+                <button class="metric-btn" data-metric="likes" type="button">
+                  Likes
+                </button>
+                <button class="metric-btn" data-metric="engagement" type="button">
+                  Engagement
+                </button>
+                <button class="metric-btn" data-metric="reach" type="button">
+                  Reach
+                </button>
+              </div>
             </div>
           </div>
-          <div id="barChart" class="chart-box" aria-label="Bar chart showing followers by platform"></div>
+          <div
+            id="barChart"
+            class="chart-box"
+            aria-label="Bar chart showing platform metrics"
+          ></div>
         </article>
 
+        <!-- Donut Chart -->
         <article class="panel">
           <div class="panel-header">
-            <h2 id="donutChartTitle">Audience Share</h2>
-            <p id="donutChartSubtitle" class="chart-subtitle">Share of followers across platforms</p>
+            <div>
+              <h2 id="donutChartTitle">Audience Share</h2>
+              <p class="chart-subtitle" id="donutChartSubtitle">
+                Share of followers across all platforms
+              </p>
+            </div>
           </div>
           <div class="donut-wrap">
-            <div id="donutChart" class="chart-box" aria-label="Donut chart showing audience share"></div>
+            <div
+              id="donutChart"
+              class="chart-box"
+              aria-label="Donut chart showing audience share"
+            ></div>
             <ul id="legend" class="legend" aria-label="Platform legend"></ul>
           </div>
         </article>
-      </section>
+      </div>
 
-      <section class="panel table-box">
+      <!-- ── Trend Chart ────────────────────────── -->
+      <article class="panel panel--full">
         <div class="panel-header">
-          <h2>Performance Table</h2>
+          <div>
+            <h2>Weekly Trend</h2>
+            <p class="chart-subtitle" id="trendSubtitle">
+              Growth over the past 12 weeks
+            </p>
+          </div>
+          <div
+            class="segmented-control"
+            id="trendMetricToggle"
+            aria-label="Select metric for trend chart"
+          >
+            <button
+              class="metric-btn active"
+              data-metric="followers"
+              type="button"
+            >
+              Followers
+            </button>
+            <button class="metric-btn" data-metric="likes" type="button">
+              Likes
+            </button>
+            <button class="metric-btn" data-metric="engagement" type="button">
+              Engagement
+            </button>
+          </div>
+        </div>
+        <div
+          id="trendChart"
+          class="chart-box trend-chart-box"
+          aria-label="Line chart showing weekly growth trend"
+        ></div>
+      </article>
+
+      <!-- ── Performance Table ──────────────────── -->
+      <article class="panel panel--full performance-panel">
+        <div class="toolbar" role="toolbar" aria-label="Dashboard controls">
+          <div class="toolbar-left">
+            <label class="toolbar-label" for="platformFilter">Platform</label>
+            <select
+              id="platformFilter"
+              class="select"
+              aria-label="Filter by platform"
+            >
+              <option value="all">All Platforms</option>
+            </select>
+
+            <label class="toolbar-label" for="sortMetric">Sort by</label>
+            <select id="sortMetric" class="select" aria-label="Sort by metric">
+              <option value="followers">Followers</option>
+              <option value="likes">Likes</option>
+              <option value="engagement">Engagement</option>
+              <option value="reach">Reach</option>
+              <option value="posts">Posts</option>
+            </select>
+
+            <button
+              id="sortDirectionBtn"
+              class="sort-btn"
+              type="button"
+              aria-label="Toggle sort direction — currently descending"
+            >
+              ↓&nbsp;Desc
+            </button>
+          </div>
+
         </div>
 
-        <table aria-label="Platform performance table">
-          <thead>
-            <tr>
-              <th>Platform</th>
-              <th>Followers</th>
-              <th>Likes</th>
-              <th>Engagement</th>
-            </tr>
-          </thead>
-          <tbody id="performanceTable"></tbody>
-        </table>
-      </section>
+        <div class="panel-header">
+          <h2>Performance Table</h2>
+          <div class="table-toolbar">
+            <div class="search-box">
+              <span class="search-icon" aria-hidden="true">🔍</span>
+              <input
+                id="tableSearch"
+                class="table-search"
+                type="search"
+                placeholder="Search platform…"
+                aria-label="Search platforms in table"
+                autocomplete="off"
+              />
+            </div>
+            <button
+              id="exportCsvBtn"
+              class="export-btn"
+              type="button"
+              aria-label="Export table data to CSV"
+            >
+              ⬇&nbsp;Export CSV
+            </button>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table aria-label="Platform performance table">
+            <thead>
+              <tr>
+                <th>Platform</th>
+                <th>Followers</th>
+                <th>Likes</th>
+                <th>Engagement</th>
+                <th>Reach</th>
+                <th>Posts</th>
+              </tr>
+            </thead>
+            <tbody id="performanceTable"></tbody>
+          </table>
+          <p id="tableEmptyState" class="table-empty" hidden>
+            No platforms match your search.
+          </p>
+        </div>
+      </article>
     </main>
 
-    <div id="chartTooltip" class="chart-tooltip" role="status" aria-live="polite"></div>
+    <!-- Chart Tooltip -->
+    <div
+      id="chartTooltip"
+      class="chart-tooltip"
+      role="status"
+      aria-live="polite"
+    ></div>
 
     <script src="script.js"></script>
   </body>

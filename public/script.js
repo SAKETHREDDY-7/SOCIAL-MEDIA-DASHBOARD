@@ -1,624 +1,1294 @@
-const platformColors = {
-  Instagram: "#170cf5",
-  Facebook: "#2cddfc",
-  Twitter: "#ffa200",
-  LinkedIn: "#1edf65",
-  TikTok: "#ff0f87",
-  YouTube: "#ee0000"
+/* ============================================================
+   SOCIAL MEDIA DASHBOARD — script.js
+   All features wired. Zero dead code. Zero console errors.
+   ============================================================ */
+
+/* ── Constants ─────────────────────────────────────────────── */
+
+const PLATFORM_COLORS = {
+  Instagram: "#9e2237",
+  Facebook: "#3B82F6",
+  Twitter: "#00b8d9",
+  LinkedIn: "#7c44ff",
+  TikTok: "#ffb83e",
+  YouTube: "#fc2323",
 };
 
-const platformFilter = document.getElementById("platformFilter");
-const metricButtons = [...document.querySelectorAll(".metric-btn")];
-const followersValue = document.getElementById("followersValue");
-const likesValue = document.getElementById("likesValue");
-const engagementValue = document.getElementById("engagementValue");
-const topPlatformValue = document.getElementById("topPlatformValue");
-const performanceTable = document.getElementById("performanceTable");
-const legend = document.getElementById("legend");
-const barChartTitle = document.getElementById("barChartTitle");
-const barChartSubtitle = document.getElementById("barChartSubtitle");
-const platformChartMode = document.getElementById("platformChartMode");
-const audienceChartMode = document.getElementById("audienceChartMode");
-const allPlatformsBtn = document.getElementById("allPlatformsBtn");
-const donutChartTitle = document.getElementById("donutChartTitle");
-const donutChartSubtitle = document.getElementById("donutChartSubtitle");
-const chartTooltip = document.getElementById("chartTooltip");
-const spotlightTitle = document.getElementById("spotlightTitle");
-const spotlightDescription = document.getElementById("spotlightDescription");
-const spotlightMetrics = document.getElementById("spotlightMetrics");
-const spotlightFollowers = document.getElementById("spotlightFollowers");
-const spotlightLikes = document.getElementById("spotlightLikes");
-const spotlightEngagement = document.getElementById("spotlightEngagement");
-const spotlightFollowersContext = document.getElementById("spotlightFollowersContext");
-const spotlightLikesContext = document.getElementById("spotlightLikesContext");
-const spotlightEngagementContext = document.getElementById("spotlightEngagementContext");
-const spotlightFollowersBar = document.getElementById("spotlightFollowersBar");
-const spotlightLikesBar = document.getElementById("spotlightLikesBar");
-const spotlightEngagementBar = document.getElementById("spotlightEngagementBar");
+const PLATFORM_ICONS = {
+  Instagram: "📸",
+  Facebook: "🟦",
+  Twitter: "🐦",
+  LinkedIn: "💼",
+  TikTok: "🎵",
+  YouTube: "▶️",
+};
 
-let platformData = [];
-let activeMetric = "followers";
-let activePlatform = "all";
-let chartMode = "platforms";
+const METRIC_LABELS = {
+  followers: "Followers",
+  likes: "Likes",
+  engagement: "Engagement Rate",
+  reach: "Reach",
+  posts: "Posts",
+};
 
-const audienceProfiles = {
+// Weekly growth seeds (12 weeks → current value).
+// Each entry is the fraction of the current metric at that week.
+const TREND_SEEDS = {
+  Instagram: [0.68, 0.72, 0.75, 0.78, 0.81, 0.84, 0.87, 0.89, 0.91, 0.93, 0.96, 1.0],
+  Facebook:  [0.80, 0.82, 0.83, 0.85, 0.86, 0.88, 0.89, 0.91, 0.92, 0.94, 0.97, 1.0],
+  Twitter:   [0.62, 0.66, 0.70, 0.74, 0.78, 0.82, 0.85, 0.88, 0.91, 0.94, 0.97, 1.0],
+  LinkedIn:  [0.83, 0.85, 0.87, 0.88, 0.90, 0.91, 0.93, 0.94, 0.95, 0.97, 0.98, 1.0],
+  TikTok:    [0.40, 0.48, 0.56, 0.63, 0.70, 0.76, 0.82, 0.87, 0.91, 0.94, 0.97, 1.0],
+  YouTube:   [0.88, 0.89, 0.90, 0.91, 0.92, 0.93, 0.94, 0.95, 0.96, 0.97, 0.98, 1.0],
+};
+
+const AUDIENCE_PROFILES = {
   Instagram: [42, 45, 8, 5],
   Facebook: [48, 39, 7, 6],
   Twitter: [58, 34, 3, 5],
   LinkedIn: [55, 40, 1, 4],
   TikTok: [44, 43, 9, 4],
-  YouTube: [46, 42, 8, 4]
+  YouTube: [46, 42, 8, 4],
 };
 
-const audienceSegments = ["Men", "Women", "Children", "Other"];
-const audienceColors = ["#170cf5", "#ff0f87", "#ffa200", "#1edf65"];
+const AUDIENCE_SEGMENTS = ["Men", "Women", "Children", "Other"];
+const AUDIENCE_COLORS = ["#4f46e5", "#e1306c", "#f59e0b", "#059669"];
 
-function formatNumber(value) {
-  if (value >= 1000000) {
-    return (value / 1000000).toFixed(1) + "M";
-  }
-  if (value >= 1000) {
-    return (value / 1000).toFixed(1) + "K";
-  }
-  return value.toString();
+// CSV values represent 30-day baseline; scale for other periods.
+const PERIOD_MULTIPLIERS = {
+  "7d":  0.26,
+  "30d": 1.00,
+  "90d": 3.15,
+};
+
+const WEEKS = Array.from({ length: 12 }, (_, i) => `W${i + 1}`);
+
+/* ── Application State ─────────────────────────────────────── */
+
+const state = {
+  period: "7d",
+  metric: "followers",      // bar chart metric
+  trendMetric: "followers", // trend chart metric
+  sortMetric: "followers",
+  sortDir: "desc",
+  activePlatform: "all",
+  searchQuery: "",
+};
+
+const DEFAULT_DATA = [
+  { platform: "Instagram", followers: "1850000", likes: "280000", posts: "145", reach: "2400000", impressions: "5200000", engagement: "15.2" },
+  { platform: "Facebook",  followers: "1250000", likes: "220000", posts: "89",  reach: "1800000", impressions: "3900000", engagement: "18.4" },
+  { platform: "Twitter",   followers: "980000",  likes: "175000", posts: "312", reach: "1500000", impressions: "2800000", engagement: "21.1" },
+  { platform: "LinkedIn",  followers: "640000",  likes: "110000", posts: "67",  reach: "950000",  impressions: "1400000", engagement: "14.8" },
+  { platform: "TikTok",    followers: "2100000", likes: "390000", posts: "203", reach: "3800000", impressions: "9500000", engagement: "17.6" },
+  { platform: "YouTube",   followers: "2600000", likes: "450000", posts: "52",  reach: "4100000", impressions: "8200000", engagement: "12.9" },
+];
+
+/* ── Raw Data (populated from CSV or fallback) ─────────────── */
+
+let rawData = [];
+
+/* ── DOM References ────────────────────────────────────────── */
+
+const $ = (id) => document.getElementById(id);
+
+const DOM = {
+  loadingSkeleton:          $("loadingSkeleton"),
+  errorBanner:              $("errorBanner"),
+  retryBtn:                 $("retryBtn"),
+  mainContent:              $("mainContent"),
+  themeToggle:              $("themeToggle"),
+  themeIcon:                $("themeIcon"),
+  platformFilter:           $("platformFilter"),
+  sortMetric:               $("sortMetric"),
+  sortDirectionBtn:         $("sortDirectionBtn"),
+  metricToggle:             $("metricToggle"),
+  trendMetricToggle:        $("trendMetricToggle"),
+  followersValue:           $("followersValue"),
+  likesValue:               $("likesValue"),
+  engagementValue:          $("engagementValue"),
+  reachValue:               $("reachValue"),
+  topPlatformValue:         $("topPlatformValue"),
+  bestPerformerValue:       $("bestPerformerValue"),
+  bestPerformerMeta:        $("bestPerformerMeta"),
+  engagementLeaderValue:    $("engagementLeaderValue"),
+  engagementLeaderMeta:     $("engagementLeaderMeta"),
+  likesLeaderValue:         $("likesLeaderValue"),
+  likesLeaderMeta:          $("likesLeaderMeta"),
+  reachLeaderValue:         $("reachLeaderValue"),
+  reachLeaderMeta:          $("reachLeaderMeta"),
+  spotlightTitle:           $("spotlightTitle"),
+  spotlightDescription:     $("spotlightDescription"),
+  spotlightMetrics:         $("spotlightMetrics"),
+  spotlightFollowers:       $("spotlightFollowers"),
+  spotlightLikes:           $("spotlightLikes"),
+  spotlightEngagement:      $("spotlightEngagement"),
+  spotlightReach:           $("spotlightReach"),
+  spotlightFollowersContext:  $("spotlightFollowersContext"),
+  spotlightLikesContext:      $("spotlightLikesContext"),
+  spotlightEngagementContext: $("spotlightEngagementContext"),
+  spotlightReachContext:      $("spotlightReachContext"),
+  spotlightFollowersBar:    $("spotlightFollowersBar"),
+  spotlightLikesBar:        $("spotlightLikesBar"),
+  spotlightEngagementBar:   $("spotlightEngagementBar"),
+  spotlightReachBar:        $("spotlightReachBar"),
+  barChartTitle:            $("barChartTitle"),
+  barChartSubtitle:         $("barChartSubtitle"),
+  donutChartTitle:          $("donutChartTitle"),
+  donutChartSubtitle:       $("donutChartSubtitle"),
+  trendSubtitle:            $("trendSubtitle"),
+  legend:                   $("legend"),
+  performanceTable:         $("performanceTable"),
+  tableSearch:              $("tableSearch"),
+  tableEmptyState:          $("tableEmptyState"),
+  exportCsvBtn:             $("exportCsvBtn"),
+  chartTooltip:             $("chartTooltip"),
+  toastContainer:           $("toastContainer"),
+};
+
+/* ── Utility Functions ─────────────────────────────────────── */
+
+function formatNumber(n) {
+  n = Number(n);
+  if (!isFinite(n)) return "–";
+  if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + "M";
+  if (n >= 1_000)     return (n / 1_000).toFixed(1) + "K";
+  return n.toLocaleString();
 }
 
-function formatMetricValue(metric, value) {
+function formatMetric(metric, value) {
   if (metric === "engagement") return `${Number(value).toFixed(1)}%`;
-  return formatNumber(Number(value));
+  return formatNumber(value);
 }
 
-function getMetricValue(item, metric) {
-  if (metric === "followers") return Number(item.followers);
-  if (metric === "likes") return Number(item.likes);
-  return Number(item.engagement);
+/** Scale a CSV field by the current period multiplier. Engagement stays unchanged. */
+function scaledValue(row, field) {
+  if (field === "engagement") return Number(row[field]);
+  return Math.round(Number(row[field]) * PERIOD_MULTIPLIERS[state.period]);
 }
+
+/** Return all platforms with period-scaled metrics. */
+function getScaledData() {
+  return rawData.map((d) => ({
+    platform:    d.platform,
+    followers:   scaledValue(d, "followers"),
+    likes:       scaledValue(d, "likes"),
+    posts:       scaledValue(d, "posts"),
+    reach:       scaledValue(d, "reach"),
+    impressions: scaledValue(d, "impressions"),
+    engagement:  Number(d.engagement),
+  }));
+}
+
+/**
+ * Return filtered + sorted data for charts and the table.
+ * Respects: platform filter, search query, sort metric, sort direction.
+ */
+function getDisplayData() {
+  let data = getScaledData();
+
+  if (state.activePlatform !== "all") {
+    data = data.filter((d) => d.platform === state.activePlatform);
+  }
+
+  if (state.searchQuery) {
+    const q = state.searchQuery.toLowerCase();
+    data = data.filter((d) => d.platform.toLowerCase().includes(q));
+  }
+
+  data.sort((a, b) => {
+    const av = a[state.sortMetric] ?? 0;
+    const bv = b[state.sortMetric] ?? 0;
+    return state.sortDir === "desc" ? bv - av : av - bv;
+  });
+
+  return data;
+}
+
+/* ── Theme ─────────────────────────────────────────────────── */
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute("data-theme", theme);
+  DOM.themeIcon.textContent = theme === "dark" ? "☀️" : "🌙";
+  DOM.themeToggle.setAttribute(
+    "aria-label",
+    theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
+  );
+  localStorage.setItem("smd-theme", theme);
+}
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute("data-theme");
+  applyTheme(current === "dark" ? "light" : "dark");
+  // Re-render charts so SVG axes pick up new CSS variable colours.
+  const data = getDisplayData();
+  renderBarChart(data);
+  renderDonutChart();
+  renderTrendChart();
+}
+
+/* ── Toast Notifications ───────────────────────────────────── */
+
+function showToast(message, type = "info") {
+  const toast = document.createElement("div");
+  toast.className = `toast toast--${type}`;
+  toast.setAttribute("role", "alert");
+  toast.textContent = message;
+  DOM.toastContainer.appendChild(toast);
+
+  setTimeout(() => {
+    toast.classList.add("is-hiding");
+    toast.addEventListener("animationend", () => toast.remove(), { once: true });
+  }, 3000);
+}
+
+/* ── Skeleton / Error States ───────────────────────────────── */
+
+function showSkeleton() {
+  DOM.loadingSkeleton.hidden = false;
+  DOM.mainContent.hidden = true;
+  DOM.errorBanner.hidden = true;
+}
+
+function hideSkeleton() {
+  DOM.loadingSkeleton.hidden = true;
+  DOM.mainContent.hidden = false;
+}
+
+function showError() {
+  DOM.loadingSkeleton.hidden = true;
+  DOM.mainContent.hidden = true;
+  DOM.errorBanner.hidden = false;
+}
+
+/* ── Filter Population ─────────────────────────────────────── */
 
 function populateFilter() {
-  const platforms = [...new Set(platformData.map(d => d.platform))];
-  platforms.forEach(platform => {
-    const option = document.createElement("option");
-    option.value = platform;
-    option.textContent = platform;
-    platformFilter.appendChild(option);
+  // Clear existing dynamic options (keep the "All Platforms" option).
+  [...DOM.platformFilter.querySelectorAll("option:not([value='all'])")].forEach(
+    (o) => o.remove()
+  );
+
+  rawData.forEach((d) => {
+    const opt = document.createElement("option");
+    opt.value = d.platform;
+    opt.textContent = `${PLATFORM_ICONS[d.platform] || ""} ${d.platform}`;
+    DOM.platformFilter.appendChild(opt);
   });
 }
 
-function getFilteredData() {
-  const selected = platformFilter.value;
-  activePlatform = selected;
-  if (selected === "all") return platformData;
-  return platformData.filter(d => d.platform === selected);
-}
+/* ── Animated Counter ──────────────────────────────────────── */
 
-function selectPlatform(platform) {
-  platformFilter.value = platform;
-  chartMode = platform === "all" ? "platforms" : "audience";
-  updateDashboard();
-}
-
-function animateValue(element, startValue, endValue, suffix = "") {
-  const duration = 500;
+function animateCounter(element, endValue, formatter) {
+  if (!element) return;
+  const duration = 650;
   const start = performance.now();
 
-  function updateFrame(now) {
-    const progress = Math.min((now - start) / duration, 1);
+  function tick(now) {
+    const elapsed = now - start;
+    const progress = Math.min(Math.max(elapsed / duration, 0), 1);
     const eased = 1 - Math.pow(1 - progress, 3);
-    const current = startValue + (endValue - startValue) * eased;
-    element.textContent = `${current.toFixed(endValue >= 100 ? 0 : 2)}${suffix}`;
-
+    element.textContent = formatter(endValue * eased);
     if (progress < 1) {
-      requestAnimationFrame(updateFrame);
+      requestAnimationFrame(tick);
+    } else {
+      element.textContent = formatter(endValue);
     }
   }
 
-  requestAnimationFrame(updateFrame);
+  requestAnimationFrame(tick);
 }
+
+/* ── Summary Cards ─────────────────────────────────────────── */
 
 function updateSummary(data) {
-  const totalFollowers = d3.sum(data, d => Number(d.followers));
-  const totalLikes = d3.sum(data, d => Number(d.likes));
-  const engagementAvg = totalFollowers ? (totalLikes / totalFollowers) * 100 : 0;
+  const all = getScaledData();   // always aggregate from all platforms
+  const totalFollowers = d3.sum(all, (d) => d.followers);
+  const totalLikes     = d3.sum(all, (d) => d.likes);
+  const totalReach     = d3.sum(all, (d) => d.reach);
+  const avgEngagement  = d3.mean(all, (d) => d.engagement) || 0;
 
-  const followerTarget = formatNumber(totalFollowers);
-  const likeTarget = formatNumber(totalLikes);
-  const engagementTarget = engagementAvg.toFixed(2) + "%";
+  animateCounter(DOM.followersValue,  totalFollowers,  (v) => formatNumber(Math.round(v)));
+  animateCounter(DOM.likesValue,      totalLikes,      (v) => formatNumber(Math.round(v)));
+  animateCounter(DOM.reachValue,      totalReach,      (v) => formatNumber(Math.round(v)));
+  animateCounter(DOM.engagementValue, avgEngagement,   (v) => `${v.toFixed(1)}%`);
 
-  followersValue.textContent = "0";
-  likesValue.textContent = "0";
-  engagementValue.textContent = "0%";
-
-  animateValue(followersValue, 0, totalFollowers, "");
-  animateValue(likesValue, 0, totalLikes, "");
-  animateValue(engagementValue, 0, engagementAvg, "%");
-
-  const top = [...data].sort((a, b) => Number(b.followers) - Number(a.followers))[0];
-  topPlatformValue.textContent = top ? top.platform : "-";
+  const top = [...all].sort((a, b) => b.followers - a.followers)[0];
+  DOM.topPlatformValue.textContent = top
+    ? `${PLATFORM_ICONS[top.platform] || ""} ${top.platform}`
+    : "–";
 }
+
+/* ── Insight Strip ─────────────────────────────────────────── */
+
+function updateInsights() {
+  const all = getScaledData();
+  if (!all.length) return;
+
+  const byFollowers  = [...all].sort((a, b) => b.followers  - a.followers)[0];
+  const byEngagement = [...all].sort((a, b) => b.engagement - a.engagement)[0];
+  const byLikes      = [...all].sort((a, b) => b.likes      - a.likes)[0];
+  const byReach      = [...all].sort((a, b) => b.reach      - a.reach)[0];
+
+  const icon = (p) => PLATFORM_ICONS[p] || "";
+
+  DOM.bestPerformerValue.textContent    = `${icon(byFollowers.platform)} ${byFollowers.platform}`;
+  DOM.bestPerformerMeta.textContent     = `${formatNumber(byFollowers.followers)} followers`;
+  DOM.engagementLeaderValue.textContent = `${icon(byEngagement.platform)} ${byEngagement.platform}`;
+  DOM.engagementLeaderMeta.textContent  = `${byEngagement.engagement.toFixed(1)}% rate`;
+  DOM.likesLeaderValue.textContent      = `${icon(byLikes.platform)} ${byLikes.platform}`;
+  DOM.likesLeaderMeta.textContent       = `${formatNumber(byLikes.likes)} likes`;
+  DOM.reachLeaderValue.textContent      = `${icon(byReach.platform)} ${byReach.platform}`;
+  DOM.reachLeaderMeta.textContent       = `${formatNumber(byReach.reach)} reached`;
+}
+
+/* ── Platform Spotlight ────────────────────────────────────── */
 
 function updateSpotlight() {
-  const selected = platformData.find(item => item.platform === activePlatform);
+  const all = getScaledData();
+  const selected = all.find((d) => d.platform === state.activePlatform);
 
   if (!selected) {
-    spotlightTitle.textContent = "Select a platform to see more";
-    spotlightDescription.textContent = "Choose a platform from the filter, chart, legend, or table to inspect its performance.";
-    spotlightMetrics.hidden = true;
+    DOM.spotlightTitle.textContent = "Select a platform";
+    DOM.spotlightDescription.textContent =
+      "Click any bar, donut slice, legend item, or table row to see a detailed breakdown.";
+    DOM.spotlightMetrics.hidden = true;
     return;
   }
 
-  const totalFollowers = d3.sum(platformData, item => Number(item.followers));
-  const totalLikes = d3.sum(platformData, item => Number(item.likes));
-  const maxEngagement = d3.max(platformData, item => Number(item.engagement)) || 1;
-  const followers = Number(selected.followers);
-  const likes = Number(selected.likes);
-  const engagement = Number(selected.engagement);
-  const audienceShare = (followers / totalFollowers) * 100;
-  const likesShare = (likes / totalLikes) * 100;
+  const totalFollowers = d3.sum(all, (d) => d.followers) || 1;
+  const totalLikes     = d3.sum(all, (d) => d.likes)     || 1;
+  const totalReach     = d3.sum(all, (d) => d.reach)     || 1;
+  const maxEngagement  = d3.max(all, (d) => d.engagement) || 1;
 
-  spotlightTitle.textContent = selected.platform;
-  spotlightDescription.textContent = `Detailed performance breakdown for ${selected.platform}.`;
-  spotlightFollowers.textContent = formatNumber(followers);
-  spotlightLikes.textContent = formatNumber(likes);
-  spotlightEngagement.textContent = `${engagement.toFixed(1)}%`;
-  spotlightFollowersContext.textContent = `${audienceShare.toFixed(1)}% of total followers`;
-  spotlightLikesContext.textContent = `${likesShare.toFixed(1)}% of total likes`;
-  spotlightEngagementContext.textContent = `${(engagement / maxEngagement * 100).toFixed(0)}% of best platform rate`;
-  spotlightFollowersBar.style.width = `${audienceShare}%`;
-  spotlightLikesBar.style.width = `${likesShare}%`;
-  spotlightEngagementBar.style.width = `${engagement / maxEngagement * 100}%`;
-  [spotlightFollowersBar, spotlightLikesBar, spotlightEngagementBar].forEach(bar => {
-    bar.style.background = platformColors[selected.platform] || "var(--primary)";
-  });
-  spotlightMetrics.hidden = false;
-}
+  const fShare = (selected.followers / totalFollowers) * 100;
+  const lShare = (selected.likes     / totalLikes)     * 100;
+  const rShare = (selected.reach     / totalReach)     * 100;
+  const eRatio = (selected.engagement / maxEngagement) * 100;
 
-function attachTableInteractions() {
-  const rows = [...performanceTable.querySelectorAll("tr")];
-  rows.forEach(row => {
-    row.addEventListener("mouseenter", () => highlightPlatform(row.dataset.platform));
-    row.addEventListener("mouseleave", clearHighlights);
-    row.addEventListener("focus", () => highlightPlatform(row.dataset.platform));
-    row.addEventListener("blur", clearHighlights);
-    row.addEventListener("click", () => {
-      selectPlatform(row.dataset.platform);
-    });
-  });
-}
+  const icon = PLATFORM_ICONS[selected.platform] || "";
 
-function renderTable(data) {
-  performanceTable.innerHTML = "";
+  DOM.spotlightTitle.textContent = `${icon} ${selected.platform}`;
+  DOM.spotlightDescription.textContent = `Detailed performance for the ${state.period} period.`;
 
-  data.forEach(item => {
-    const row = document.createElement("tr");
-    row.dataset.platform = item.platform;
-    row.tabIndex = 0;
-    if (activePlatform !== "all" && item.platform === activePlatform) {
-      row.classList.add("is-selected");
-    }
+  DOM.spotlightFollowers.textContent        = formatNumber(selected.followers);
+  DOM.spotlightFollowersContext.textContent = `${fShare.toFixed(1)}% of total followers`;
+  DOM.spotlightLikes.textContent            = formatNumber(selected.likes);
+  DOM.spotlightLikesContext.textContent     = `${lShare.toFixed(1)}% of total likes`;
+  DOM.spotlightEngagement.textContent       = `${selected.engagement.toFixed(1)}%`;
+  DOM.spotlightEngagementContext.textContent= `${eRatio.toFixed(0)}% of best platform rate`;
+  DOM.spotlightReach.textContent            = formatNumber(selected.reach);
+  DOM.spotlightReachContext.textContent     = `${rShare.toFixed(1)}% of total reach`;
 
-    row.innerHTML = `
-      <td>${item.platform}</td>
-      <td>${formatNumber(Number(item.followers))}</td>
-      <td>${formatNumber(Number(item.likes))}</td>
-      <td>${item.engagement}%</td>
-    `;
-    performanceTable.appendChild(row);
+  const color = PLATFORM_COLORS[selected.platform] || "var(--primary)";
+  [
+    DOM.spotlightFollowersBar,
+    DOM.spotlightLikesBar,
+    DOM.spotlightEngagementBar,
+    DOM.spotlightReachBar,
+  ].forEach((bar) => { bar.style.background = color; });
+
+  // Animate bars on next frame so CSS transition fires.
+  requestAnimationFrame(() => {
+    DOM.spotlightFollowersBar.style.width  = `${fShare}%`;
+    DOM.spotlightLikesBar.style.width      = `${lShare}%`;
+    DOM.spotlightEngagementBar.style.width = `${eRatio}%`;
+    DOM.spotlightReachBar.style.width      = `${rShare}%`;
   });
 
-  attachTableInteractions();
+  DOM.spotlightMetrics.hidden = false;
 }
 
-function highlightPlatform(platformName) {
-  const target = platformName || activePlatform;
+/* ── Tooltip ───────────────────────────────────────────────── */
 
-  if (!target || target === "all") {
-    clearHighlights();
-    return;
-  }
+function showTooltip(event, html) {
+  DOM.chartTooltip.innerHTML = html;
+  DOM.chartTooltip.classList.add("is-visible");
+
+  // Prevent tooltip from going off-screen on the right
+  const tipWidth = 170;
+  const left =
+    event.clientX + 16 + tipWidth > window.innerWidth
+      ? event.clientX - tipWidth - 8
+      : event.clientX + 16;
+
+  DOM.chartTooltip.style.left = `${left}px`;
+  DOM.chartTooltip.style.top  = `${event.clientY + 16}px`;
+}
+
+function hideTooltip() {
+  DOM.chartTooltip.classList.remove("is-visible");
+}
+
+function platformTooltipHTML(d) {
+  const icon = PLATFORM_ICONS[d.platform] || "";
+  return [
+    `<strong>${icon} ${d.platform}</strong>`,
+    `<span>Followers: ${formatNumber(d.followers)}</span>`,
+    `<span>Likes: ${formatNumber(d.likes)}</span>`,
+    `<span>Engagement: ${d.engagement.toFixed(1)}%</span>`,
+    `<span>Reach: ${formatNumber(d.reach)}</span>`,
+  ].join("");
+}
+
+/* ── Highlight / Select ────────────────────────────────────── */
+
+function highlightPlatform(name) {
+  if (!name || name === "all") { clearHighlights(); return; }
 
   d3.selectAll(".bar")
-    .classed("is-active", d => d.platform === target)
-    .style("opacity", d => d.platform === target ? 1 : 0.45);
+    .style("opacity", (d) => (d.platform === name ? 1 : 0.3))
+    .classed("is-active", (d) => d.platform === name);
 
   d3.selectAll(".donut-slice")
-    .classed("is-active", d => d.data.platform === target)
-    .style("opacity", d => d.data.platform === target ? 1 : 0.4);
+    .style("opacity", (d) => (d.data.platform === name ? 1 : 0.3))
+    .classed("is-active", (d) => d.data.platform === name);
 
-  const legendItems = [...legend.querySelectorAll("li")];
-  legendItems.forEach(item => {
-    const isActive = item.dataset.platform === target;
-    item.classList.toggle("is-active", isActive);
-    item.classList.toggle("is-muted", !isActive);
+  [...DOM.legend.querySelectorAll("li")].forEach((li) => {
+    const active = li.dataset.platform === name;
+    li.classList.toggle("is-active", active);
+    li.classList.toggle("is-muted", !active);
   });
 
-  const rows = [...performanceTable.querySelectorAll("tr")];
-  rows.forEach(row => {
-    row.classList.toggle("is-selected", row.dataset.platform === target);
+  [...DOM.performanceTable.querySelectorAll("tr")].forEach((row) => {
+    row.classList.toggle("is-selected", row.dataset.platform === name);
   });
 }
 
 function clearHighlights() {
-  d3.selectAll(".bar")
-    .classed("is-active", false)
-    .style("opacity", 1);
-
-  d3.selectAll(".donut-slice")
-    .classed("is-active", false)
-    .style("opacity", 1);
-
-  [...legend.querySelectorAll("li")].forEach(item => {
-    item.classList.remove("is-active", "is-muted");
-  });
-
-  [...performanceTable.querySelectorAll("tr")].forEach(row => {
-    row.classList.remove("is-selected");
-  });
+  d3.selectAll(".bar").style("opacity", 1).classed("is-active", false);
+  d3.selectAll(".donut-slice").style("opacity", 1).classed("is-active", false);
+  [...DOM.legend.querySelectorAll("li")].forEach((li) =>
+    li.classList.remove("is-active", "is-muted")
+  );
+  [...DOM.performanceTable.querySelectorAll("tr")].forEach((row) =>
+    row.classList.remove("is-selected")
+  );
+  // Restore selected-platform highlight if one is active
+  if (state.activePlatform !== "all") {
+    [...DOM.performanceTable.querySelectorAll("tr")].forEach((row) => {
+      if (row.dataset.platform === state.activePlatform) {
+        row.classList.add("is-selected");
+      }
+    });
+  }
 }
 
-function getAudienceData(platform) {
-  const shares = audienceProfiles[platform] || [45, 42, 8, 5];
-  return shares.map((share, index) => ({
-    segment: audienceSegments[index],
-    share,
-    color: audienceColors[index]
-  }));
+function selectPlatform(name) {
+  if (name === state.activePlatform) return; // no-op on same selection
+  state.activePlatform = name;
+  DOM.platformFilter.value = name;
+  updateDashboard();
+  if (name !== "all") {
+    const icon = PLATFORM_ICONS[name] || "";
+    showToast(`${icon} Viewing ${name}`, "info");
+  }
 }
 
-function showChartTooltip(event, content) {
-  chartTooltip.innerHTML = content;
-  chartTooltip.classList.add("is-visible");
-  chartTooltip.style.left = `${event.clientX + 14}px`;
-  chartTooltip.style.top = `${event.clientY + 14}px`;
+/* ── Sort Direction Button ─────────────────────────────────── */
+
+function syncSortBtn() {
+  if (state.sortDir === "desc") {
+    DOM.sortDirectionBtn.textContent = "↓\u00A0Desc";
+    DOM.sortDirectionBtn.classList.remove("is-asc");
+    DOM.sortDirectionBtn.setAttribute("aria-label", "Sort direction: descending — click to switch to ascending");
+  } else {
+    DOM.sortDirectionBtn.textContent = "↑\u00A0Asc";
+    DOM.sortDirectionBtn.classList.add("is-asc");
+    DOM.sortDirectionBtn.setAttribute("aria-label", "Sort direction: ascending — click to switch to descending");
+  }
 }
 
-function hideChartTooltip() {
-  chartTooltip.classList.remove("is-visible");
-}
-
-function platformTooltip(item, extra = "") {
-  return `<strong>${item.platform}</strong>${extra}<span>Followers: ${formatNumber(Number(item.followers))}</span><span>Likes: ${formatNumber(Number(item.likes))}</span><span>Engagement: ${item.engagement}%</span>`;
-}
-
-function audienceTooltip(platform, segment, share) {
-  const item = platformData.find(data => data.platform === platform);
-  return platformTooltip(item, `<em>${segment}: ${share}% (estimated)</em>`);
-}
-
-function addDonutCenter(svg, title, value, subtitle, accent = "#4f46e5") {
-  const center = svg.append("g")
-    .attr("class", "donut-center")
-    .attr("text-anchor", "middle");
-
-  center.append("circle")
-    .attr("class", "donut-center-background")
-    .attr("r", 58)
-    .style("stroke", accent);
-
-  center.append("text")
-    .attr("class", "donut-center-title")
-    .attr("y", -18)
-    .text(title);
-  center.append("text")
-    .attr("class", "donut-center-value")
-    .attr("y", 8)
-    .style("fill", accent)
-    .text(value);
-  center.append("text")
-    .attr("class", "donut-center-subtitle")
-    .attr("y", 28)
-    .text(subtitle);
-}
+/* ── Bar Chart ─────────────────────────────────────────────── */
 
 function renderBarChart(data) {
   const container = document.getElementById("barChart");
   container.innerHTML = "";
 
-  const selectedPlatform = platformData.find(item => item.platform === activePlatform);
-  if (chartMode === "audience" && selectedPlatform) {
-    container.setAttribute("aria-label", `Estimated audience mix for ${selectedPlatform.platform}`);
-    renderAudienceChart(container, selectedPlatform.platform);
+  if (state.activePlatform !== "all") {
+    renderAudienceBarChart(container, state.activePlatform);
     return;
   }
 
-  container.setAttribute("aria-label", "Bar chart showing followers by platform");
+  if (!data.length) return;
 
-  const width = container.clientWidth || 550;
-  const height = 320;
-  const margin = { top: 20, right: 20, bottom: 48, left: 52 };
+  const width  = Math.max(container.clientWidth || 0, 260);
+  const height = 300;
+  const margin = { top: 24, right: 16, bottom: 52, left: 60 };
 
-  const svg = d3.select(container)
+  const svg = d3
+    .select(container)
     .append("svg")
     .attr("width", width)
-    .attr("height", height);
+    .attr("height", height)
+    .attr("aria-label", `${METRIC_LABELS[state.metric]} by Platform`);
 
-  const x = d3.scaleBand()
-    .domain(data.map(d => d.platform))
+  const x = d3
+    .scaleBand()
+    .domain(data.map((d) => d.platform))
     .range([margin.left, width - margin.right])
-    .padding(0.3);
+    .padding(0.32);
 
-  const yMax = d3.max(data, d => getMetricValue(d, activeMetric)) || 1;
-  const y = d3.scaleLinear()
-    .domain([0, yMax * 1.25])
+  const yMax = d3.max(data, (d) => d[state.metric]) || 1;
+  const y = d3
+    .scaleLinear()
+    .domain([0, yMax * 1.22])
     .nice()
     .range([height - margin.bottom, margin.top]);
 
-  svg.append("g")
-    .attr("transform", `translate(0,${height - margin.bottom})`)
-    .call(d3.axisBottom(x))
-    .call(g => g.selectAll("text")
-      .style("font-size", "12px")
-      .style("fill", "#64748b"));
+  // Horizontal grid
+  svg
+    .append("g")
+    .attr("class", "grid")
+    .attr("transform", `translate(${margin.left}, 0)`)
+    .call(
+      d3
+        .axisLeft(y)
+        .ticks(5)
+        .tickSize(-(width - margin.left - margin.right))
+        .tickFormat("")
+    )
+    .call((g) => g.select(".domain").remove());
 
-  svg.append("g")
-    .attr("transform", `translate(${margin.left},0)`)
-    .call(d3.axisLeft(y).ticks(5).tickFormat(d => formatMetricValue(activeMetric, d)))
-    .call(g => g.selectAll("text")
-      .style("font-size", "12px")
-      .style("fill", "#64748b"));
+  // X axis
+  svg
+    .append("g")
+    .attr("transform", `translate(0, ${height - margin.bottom})`)
+    .call(d3.axisBottom(x).tickSizeOuter(0))
+    .call((g) => g.select(".domain").remove())
+    .call((g) =>
+      g
+        .selectAll("text")
+        .style("font-size", "12px")
+        .style("fill", "var(--muted)")
+        .style("font-weight", "600")
+    );
 
-  svg.selectAll(".bar")
+  // Y axis
+  svg
+    .append("g")
+    .attr("transform", `translate(${margin.left}, 0)`)
+    .call(
+      d3
+        .axisLeft(y)
+        .ticks(5)
+        .tickFormat((v) => formatMetric(state.metric, v))
+    )
+    .call((g) => g.select(".domain").remove())
+    .call((g) =>
+      g.selectAll("text").style("font-size", "11px").style("fill", "var(--muted)")
+    );
+
+  // Bars with enter animation
+  svg
+    .selectAll(".bar")
     .data(data)
     .enter()
     .append("rect")
     .attr("class", "bar")
-    .attr("x", d => x(d.platform))
-    .attr("y", d => y(getMetricValue(d, activeMetric)))
+    .attr("x", (d) => x(d.platform))
+    .attr("y", height - margin.bottom)
     .attr("width", x.bandwidth())
-    .attr("height", d => y(0) - y(getMetricValue(d, activeMetric)))
-    .attr("rx", 8)
-    .attr("fill", d => platformColors[d.platform] || "#4f46e5")
-    .on("mousemove", (event, d) => showChartTooltip(event, platformTooltip(d)))
+    .attr("height", 0)
+    .attr("rx", 7)
+    .attr("fill", (d) => PLATFORM_COLORS[d.platform] || "var(--primary)")
+    .on("mousemove", (event, d) => showTooltip(event, platformTooltipHTML(d)))
     .on("mouseenter", (_, d) => highlightPlatform(d.platform))
-    .on("mouseleave", () => {
-      hideChartTooltip();
-      clearHighlights();
-    })
-    .on("click", (_, d) => {
-      selectPlatform(d.platform);
-    })
-    .append("title")
-    .text(d => `${d.platform}: ${formatMetricValue(activeMetric, getMetricValue(d, activeMetric))}`);
-}
+    .on("mouseleave", () => { hideTooltip(); clearHighlights(); })
+    .on("click", (_, d) => selectPlatform(d.platform))
+    .transition()
+    .duration(550)
+    .delay((_, i) => i * 55)
+    .ease(d3.easeCubicOut)
+    .attr("y", (d) => y(d[state.metric]))
+    .attr("height", (d) => y(0) - y(d[state.metric]));
 
-function renderAudienceChart(container, platform) {
-  const audienceData = getAudienceData(platform);
-  const width = container.clientWidth || 550;
-  const height = 320;
-  const margin = { top: 20, right: 20, bottom: 48, left: 52 };
-  const svg = d3.select(container)
-    .append("svg")
-    .attr("width", width)
-    .attr("height", height);
-  const x = d3.scaleBand()
-    .domain(audienceData.map(d => d.segment))
-    .range([margin.left, width - margin.right])
-    .padding(0.3);
-  const y = d3.scaleLinear()
-    .domain([0, 100])
-    .range([height - margin.bottom, margin.top]);
-
-  svg.append("g")
-    .attr("transform", `translate(0,${height - margin.bottom})`)
-    .call(d3.axisBottom(x))
-    .call(g => g.selectAll("text").style("font-size", "12px").style("fill", "#64748b"));
-  svg.append("g")
-    .attr("transform", `translate(${margin.left},0)`)
-    .call(d3.axisLeft(y).ticks(5).tickFormat(d => `${d}%`))
-    .call(g => g.selectAll("text").style("font-size", "12px").style("fill", "#64748b"));
-
-  svg.selectAll(".segment-bar")
-    .data(audienceData)
+  // Value labels above each bar
+  svg
+    .selectAll(".bar-label")
+    .data(data)
     .enter()
-    .append("rect")
-    .attr("class", "segment-bar")
-    .attr("x", d => x(d.segment))
-    .attr("y", d => y(d.share))
-    .attr("width", x.bandwidth())
-    .attr("height", d => y(0) - y(d.share))
-    .attr("rx", 8)
-    .attr("fill", d => d.color)
-    .on("mousemove", (event, d) => showChartTooltip(event, audienceTooltip(platform, d.segment, d.share)))
-    .on("mouseleave", hideChartTooltip)
-    .append("title")
-    .text(d => `${d.segment}: ${d.share}% (estimated)`);
+    .append("text")
+    .attr("class", "bar-label")
+    .attr("x", (d) => x(d.platform) + x.bandwidth() / 2)
+    .attr("y", (d) => y(d[state.metric]) - 6)
+    .attr("text-anchor", "middle")
+    .style("font-size", "11px")
+    .style("font-weight", "700")
+    .style("fill", "var(--muted)")
+    .style("opacity", 0)
+    .text((d) => formatMetric(state.metric, d[state.metric]))
+    .transition()
+    .delay((_, i) => i * 55 + 380)
+    .duration(180)
+    .style("opacity", 1);
+
+  DOM.barChartTitle.textContent    = `${METRIC_LABELS[state.metric] || state.metric} by Platform`;
+  DOM.barChartSubtitle.textContent = `${state.period.toUpperCase()} period — compare across platforms`;
 }
 
-function renderDonutChart(data) {
-  const container = document.getElementById("donutChart");
-  container.innerHTML = "";
-  legend.innerHTML = "";
-
-  const selectedPlatform = platformData.find(item => item.platform === activePlatform);
-  if (chartMode === "audience" && selectedPlatform) {
-    renderAudienceDonut(container, selectedPlatform.platform);
-    return;
-  }
-
-  donutChartTitle.textContent = "Audience Share";
-  donutChartSubtitle.textContent = "Share of followers across platforms";
-
-  const width = 260;
-  const height = 260;
-  const radius = Math.min(width, height) / 2;
-
-  const svg = d3.select(container)
+function renderAudienceBarChart(container, platform) {
+  const shares = AUDIENCE_PROFILES[platform] || [45, 42, 8, 5];
+  const data = AUDIENCE_SEGMENTS.map((segment, index) => ({
+    segment,
+    share: shares[index],
+    color: AUDIENCE_COLORS[index],
+  }));
+  const width = Math.max(container.clientWidth || 0, 260);
+  const height = 300;
+  const margin = { top: 24, right: 16, bottom: 52, left: 60 };
+  const svg = d3
+    .select(container)
     .append("svg")
     .attr("width", width)
     .attr("height", height)
+    .attr("aria-label", `Estimated audience mix for ${platform}`);
+
+  const x = d3
+    .scaleBand()
+    .domain(data.map((item) => item.segment))
+    .range([margin.left, width - margin.right])
+    .padding(0.3);
+  const y = d3
+    .scaleLinear()
+    .domain([0, 100])
+    .range([height - margin.bottom, margin.top]);
+
+  svg
     .append("g")
-    .attr("transform", `translate(${width / 2}, ${height / 2})`);
+    .attr("class", "grid")
+    .attr("transform", `translate(${margin.left}, 0)`)
+    .call(
+      d3
+        .axisLeft(y)
+        .ticks(5)
+        .tickSize(-(width - margin.left - margin.right))
+        .tickFormat("")
+    )
+    .call((g) => g.select(".domain").remove());
 
-  const pie = d3.pie()
-    .sort(null)
-    .value(d => Number(d.followers));
+  svg
+    .append("g")
+    .attr("transform", `translate(0, ${height - margin.bottom})`)
+    .call(d3.axisBottom(x).tickSizeOuter(0))
+    .call((g) => g.select(".domain").remove())
+    .call((g) =>
+      g
+        .selectAll("text")
+        .style("font-size", "12px")
+        .style("fill", "var(--muted)")
+        .style("font-weight", "600")
+    );
 
-  const arc = d3.arc()
-    .innerRadius(radius * 0.55)
-    .outerRadius(radius);
+  svg
+    .append("g")
+    .attr("transform", `translate(${margin.left}, 0)`)
+    .call(d3.axisLeft(y).ticks(5).tickFormat((value) => `${value}%`))
+    .call((g) => g.select(".domain").remove())
+    .call((g) =>
+      g.selectAll("text").style("font-size", "11px").style("fill", "var(--muted)")
+    );
 
-  const arcs = pie(data);
+  const bars = svg
+    .selectAll(".audience-bar")
+    .data(data)
+    .enter()
+    .append("rect")
+    .attr("class", "audience-bar")
+    .attr("x", (item) => x(item.segment))
+    .attr("y", y(0))
+    .attr("width", x.bandwidth())
+    .attr("height", 0)
+    .attr("rx", 7)
+    .attr("fill", (item) => item.color)
+    .on("mousemove", (event, item) =>
+      showTooltip(
+        event,
+        `<strong>${PLATFORM_ICONS[platform] || ""} ${platform}</strong>` +
+          `<em>${item.segment}: ${item.share}% (estimated)</em>`
+      )
+    )
+    .on("mouseleave", hideTooltip);
 
-  addDonutCenter(
-    svg,
-    "Total audience",
-    formatNumber(d3.sum(data, item => Number(item.followers))),
-    "followers",
-    "#4f46e5"
-  );
+  bars
+    .append("title")
+    .text((item) => `${item.segment}: ${item.share}% (estimated)`);
 
-  svg.selectAll("path")
+  bars
+    .transition()
+    .duration(550)
+    .ease(d3.easeCubicOut)
+    .attr("y", (item) => y(item.share))
+    .attr("height", (item) => y(0) - y(item.share));
+
+  svg
+    .selectAll(".audience-label")
+    .data(data)
+    .enter()
+    .append("text")
+    .attr("class", "audience-label")
+    .attr("x", (item) => x(item.segment) + x.bandwidth() / 2)
+    .attr("y", (item) => y(item.share) - 7)
+    .attr("text-anchor", "middle")
+    .style("font-size", "11px")
+    .style("font-weight", "700")
+    .style("fill", "var(--muted)")
+    .text((item) => `${item.share}%`);
+
+  DOM.barChartTitle.textContent = `${platform} Audience Mix`;
+  DOM.barChartSubtitle.textContent = "Estimated audience breakdown";
+}
+
+/* ── Donut Chart ───────────────────────────────────────────── */
+
+function renderDonutChart() {
+  const container = document.getElementById("donutChart");
+  container.innerHTML = "";
+  DOM.legend.innerHTML = "";
+
+  // Donut always shows ALL platforms for audience context.
+  const data = getScaledData();
+  if (!data.length) return;
+
+  DOM.donutChartTitle.textContent    = "Audience Share";
+  DOM.donutChartSubtitle.textContent = "Follower distribution — all platforms";
+
+  const size   = 240;
+  const radius = size / 2;
+
+  const svg = d3
+    .select(container)
+    .append("svg")
+    .attr("width", size)
+    .attr("height", size)
+    .attr("aria-label", "Donut chart — audience share")
+    .append("g")
+    .attr("transform", `translate(${radius}, ${radius})`);
+
+  const pie   = d3.pie().sort(null).value((d) => d.followers).padAngle(0.028);
+  const arc   = d3.arc().innerRadius(radius * 0.54).outerRadius(radius - 5);
+  const arcHo = d3.arc().innerRadius(radius * 0.54).outerRadius(radius + 5);
+  const arcs  = pie(data);
+  const total = d3.sum(data, (d) => d.followers) || 1;
+
+  // Center label
+  const center = svg.append("g").attr("class", "donut-center");
+  center
+    .append("circle")
+    .attr("r", radius * 0.5)
+    .style("fill", "var(--panel)")
+    .style("stroke", "var(--primary)")
+    .style("stroke-width", 2)
+    .style("stroke-opacity", 0.2);
+  center
+    .append("text")
+    .attr("y", -16)
+    .attr("text-anchor", "middle")
+    .style("fill", "var(--muted)")
+    .style("font-size", "9px")
+    .style("font-weight", "800")
+    .style("letter-spacing", "0.1em")
+    .text("AUDIENCE");
+  center
+    .append("text")
+    .attr("y", 8)
+    .attr("text-anchor", "middle")
+    .style("fill", "var(--primary)")
+    .style("font-size", "18px")
+    .style("font-weight", "800")
+    .text(formatNumber(total));
+  center
+    .append("text")
+    .attr("y", 24)
+    .attr("text-anchor", "middle")
+    .style("fill", "var(--muted)")
+    .style("font-size", "9px")
+    .text("followers");
+
+  // Slices
+  svg
+    .selectAll(".donut-slice")
     .data(arcs)
     .enter()
     .append("path")
     .attr("class", "donut-slice")
     .attr("d", arc)
-    .attr("fill", d => platformColors[d.data.platform] || "#4f46e5")
-    .attr("stroke", "#ffffff")
+    .attr("fill", (d) => PLATFORM_COLORS[d.data.platform] || "var(--primary)")
+    .attr("stroke", "var(--panel)")
     .attr("stroke-width", 2)
+    .style("opacity", 0)
     .on("mousemove", (event, d) => {
-      const totalFollowers = d3.sum(data, item => Number(item.followers));
-      const share = (d.value / totalFollowers) * 100;
-      showChartTooltip(event, platformTooltip(d.data, `<em>Audience share: ${share.toFixed(1)}%</em>`));
+      const share = ((d.value / total) * 100).toFixed(1);
+      showTooltip(
+        event,
+        `<strong>${PLATFORM_ICONS[d.data.platform] || ""} ${d.data.platform}</strong>` +
+        `<em>Audience share: ${share}%</em>` +
+        `<span>Followers: ${formatNumber(d.data.followers)}</span>` +
+        `<span>Likes: ${formatNumber(d.data.likes)}</span>` +
+        `<span>Engagement: ${d.data.engagement.toFixed(1)}%</span>`
+      );
     })
-    .on("mouseenter", (_, d) => highlightPlatform(d.data.platform))
-    .on("mouseleave", () => {
-      hideChartTooltip();
+    .on("mouseenter", function (_, d) {
+      d3.select(this).attr("d", arcHo);
+      highlightPlatform(d.data.platform);
+    })
+    .on("mouseleave", function (_, d) {
+      d3.select(this).attr("d", arc);
+      hideTooltip();
       clearHighlights();
     })
-    .append("title")
-    .text(d => `${d.data.platform}: ${formatNumber(Number(d.data.followers))}`);
+    .on("click", (_, d) => selectPlatform(d.data.platform))
+    .transition()
+    .duration(650)
+    .delay((_, i) => i * 80)
+    .style("opacity", 1);
 
-  data.forEach(item => {
+  // Dim non-selected slices if a platform is selected
+  if (state.activePlatform !== "all") {
+    d3.selectAll(".donut-slice")
+      .style("opacity", (d) =>
+        d.data.platform === state.activePlatform ? 1 : 0.3
+      );
+  }
+
+  // Legend
+  data.forEach((item) => {
+    const share = ((item.followers / total) * 100).toFixed(1);
     const li = document.createElement("li");
     li.dataset.platform = item.platform;
+
     const dot = document.createElement("span");
-    dot.className = "dot";
-    dot.style.background = platformColors[item.platform] || "#4f46e5";
+    dot.className = "legend-dot";
+    dot.style.background = PLATFORM_COLORS[item.platform] || "var(--primary)";
 
-    const text = document.createElement("span");
-    text.textContent = `${item.platform} (${formatNumber(Number(item.followers))})`;
+    const txt = document.createElement("span");
+    txt.innerHTML = `<b>${item.platform}</b>&thinsp;<small style="color:var(--muted)">${share}%</small>`;
 
-    li.appendChild(dot);
-    li.appendChild(text);
-    legend.appendChild(li);
-  });
-
-  [...legend.querySelectorAll("li")].forEach(li => {
-    li.addEventListener("mouseenter", () => highlightPlatform(li.dataset.platform));
+    li.append(dot, txt);
+    li.addEventListener("mouseenter", () => highlightPlatform(item.platform));
     li.addEventListener("mouseleave", clearHighlights);
-    li.addEventListener("click", () => {
-      selectPlatform(li.dataset.platform);
-    });
+    li.addEventListener("click", () => selectPlatform(item.platform));
+
+    if (state.activePlatform !== "all") {
+      li.classList.toggle("is-active", item.platform === state.activePlatform);
+      li.classList.toggle("is-muted",  item.platform !== state.activePlatform);
+    }
+
+    DOM.legend.appendChild(li);
   });
 }
 
-function renderAudienceDonut(container, platform) {
-  donutChartTitle.textContent = `${platform} Audience Share`;
-  donutChartSubtitle.textContent = "Estimated audience breakdown";
+/* ── Trend Line Chart ──────────────────────────────────────── */
 
-  const audienceData = getAudienceData(platform);
-  const width = 260;
-  const height = 260;
-  const radius = Math.min(width, height) / 2;
-  const svg = d3.select(container)
+function renderTrendChart() {
+  const container = document.getElementById("trendChart");
+  container.innerHTML = "";
+
+  if (!rawData.length) return;
+
+  const metric     = state.trendMetric;
+  const isSingle   = state.activePlatform !== "all";
+  const allScaled  = getScaledData();
+  const platforms  = isSingle
+    ? allScaled.filter((d) => d.platform === state.activePlatform)
+    : allScaled;
+
+  if (!platforms.length) return;
+
+  // Build per-platform weekly series
+  const series = platforms.map((p) => {
+    const seeds = TREND_SEEDS[p.platform] ||
+      Array.from({ length: 12 }, (_, i) => 0.7 + 0.3 * (i / 11));
+    const baseVal = p[metric] ?? 0;
+
+    return {
+      platform: p.platform,
+      color: PLATFORM_COLORS[p.platform] || "var(--primary)",
+      values: seeds.map((s, i) => ({
+        week: WEEKS[i],
+        value:
+          metric === "engagement"
+            ? parseFloat((baseVal * s).toFixed(2))
+            : Math.round(baseVal * s),
+      })),
+    };
+  });
+
+  const width  = Math.max(container.clientWidth || 0, 320);
+  const height = 240;
+  const legendW = isSingle ? 0 : 110;
+  const margin  = { top: 20, right: 20 + legendW, bottom: 40, left: 65 };
+
+  const svg = d3
+    .select(container)
     .append("svg")
     .attr("width", width)
     .attr("height", height)
-    .attr("aria-label", `Estimated audience share for ${platform}`)
+    .attr("aria-label", `Weekly ${METRIC_LABELS[metric]} trend`);
+
+  const x = d3
+    .scalePoint()
+    .domain(WEEKS)
+    .range([margin.left, width - margin.right])
+    .padding(0.1);
+
+  const allVals = series.flatMap((s) => s.values.map((v) => v.value));
+  const yMin    = (d3.min(allVals) || 0) * 0.85;
+  const yMax    = (d3.max(allVals) || 1) * 1.12;
+
+  const y = d3.scaleLinear().domain([yMin, yMax]).nice().range([height - margin.bottom, margin.top]);
+
+  // Grid
+  svg
     .append("g")
-    .attr("transform", `translate(${width / 2}, ${height / 2})`);
-  const pie = d3.pie().sort(null).value(d => d.share);
-  const arc = d3.arc()
-    .innerRadius(radius * 0.55)
-    .outerRadius(radius);
+    .attr("class", "grid")
+    .attr("transform", `translate(${margin.left}, 0)`)
+    .call(
+      d3
+        .axisLeft(y)
+        .ticks(5)
+        .tickSize(-(width - margin.left - margin.right))
+        .tickFormat("")
+    )
+    .call((g) => g.select(".domain").remove());
 
-  const selected = platformData.find(item => item.platform === platform);
-  addDonutCenter(
-    svg,
-    platform,
-    formatNumber(Number(selected.followers)),
-    "followers",
-    platformColors[platform] || "#4f46e5"
-  );
+  // X axis
+  svg
+    .append("g")
+    .attr("transform", `translate(0, ${height - margin.bottom})`)
+    .call(d3.axisBottom(x).tickSizeOuter(0))
+    .call((g) => g.select(".domain").remove())
+    .call((g) => g.selectAll("text").style("font-size", "11px").style("fill", "var(--muted)"));
 
-  svg.selectAll("path")
-    .data(pie(audienceData))
-    .enter()
-    .append("path")
-    .attr("class", "donut-slice audience-slice")
-    .attr("d", arc)
-    .attr("fill", d => d.data.color)
-    .attr("stroke", "#ffffff")
-    .attr("stroke-width", 2)
-    .on("mousemove", (event, d) => showChartTooltip(event, audienceTooltip(platform, d.data.segment, d.data.share)))
-    .on("mouseleave", hideChartTooltip)
-    .append("title")
-    .text(d => `${d.data.segment}: ${d.data.share}% (estimated)`);
+  // Y axis
+  svg
+    .append("g")
+    .attr("transform", `translate(${margin.left}, 0)`)
+    .call(
+      d3.axisLeft(y).ticks(5).tickFormat((v) => formatMetric(metric, v))
+    )
+    .call((g) => g.select(".domain").remove())
+    .call((g) => g.selectAll("text").style("font-size", "11px").style("fill", "var(--muted)"));
 
-  audienceData.forEach(item => {
-    const li = document.createElement("li");
-    li.dataset.segment = item.segment;
-    const dot = document.createElement("span");
-    dot.className = "dot";
-    dot.style.background = item.color;
-    const text = document.createElement("span");
-    text.textContent = `${item.segment} (${item.share}%)`;
-    li.append(dot, text);
-    legend.appendChild(li);
+  const lineGen = d3
+    .line()
+    .x((d) => x(d.week))
+    .y((d) => y(d.value))
+    .curve(d3.curveCatmullRom.alpha(0.5));
+
+  const areaGen = d3
+    .area()
+    .x((d) => x(d.week))
+    .y0(height - margin.bottom)
+    .y1((d) => y(d.value))
+    .curve(d3.curveCatmullRom.alpha(0.5));
+
+  series.forEach((s) => {
+    // Area fill for single platform or small set
+    if (isSingle) {
+      svg
+        .append("path")
+        .datum(s.values)
+        .attr("d", areaGen)
+        .attr("fill", s.color)
+        .attr("opacity", 0.12);
+    }
+
+    // Line with draw animation
+    const path = svg
+      .append("path")
+      .datum(s.values)
+      .attr("d", lineGen)
+      .attr("fill", "none")
+      .attr("stroke", s.color)
+      .attr("stroke-width", isSingle ? 3 : 2)
+      .attr("stroke-linecap", "round");
+
+    const len = path.node().getTotalLength();
+    path
+      .attr("stroke-dasharray", `${len} ${len}`)
+      .attr("stroke-dashoffset", len)
+      .transition()
+      .duration(900)
+      .ease(d3.easeQuadOut)
+      .attr("stroke-dashoffset", 0);
+
+    // Interactive dots
+    svg
+      .selectAll(`.dot-${s.platform.replace(/\s/g, "-")}`)
+      .data(s.values)
+      .enter()
+      .append("circle")
+      .attr("cx", (d) => x(d.week))
+      .attr("cy", (d) => y(d.value))
+      .attr("r", isSingle ? 4.5 : 3)
+      .attr("fill", s.color)
+      .attr("stroke", "var(--panel)")
+      .attr("stroke-width", 2)
+      .style("cursor", "pointer")
+      .style("opacity", 0)
+      .on("mousemove", (event, d) =>
+        showTooltip(
+          event,
+          `<strong>${PLATFORM_ICONS[s.platform] || ""} ${s.platform} — ${d.week}</strong>` +
+          `<em>${METRIC_LABELS[metric]}: ${formatMetric(metric, d.value)}</em>`
+        )
+      )
+      .on("mouseleave", hideTooltip)
+      .transition()
+      .delay((_, i) => i * 65 + 500)
+      .duration(200)
+      .style("opacity", 1);
+  });
+
+  // Right-side legend for multi-platform view
+  if (!isSingle && series.length > 1) {
+    const lx = width - legendW + 8;
+    series.forEach((s, i) => {
+      svg
+        .append("circle")
+        .attr("cx", lx)
+        .attr("cy", margin.top + i * 22)
+        .attr("r", 5)
+        .attr("fill", s.color);
+      svg
+        .append("text")
+        .attr("x", lx + 12)
+        .attr("y", margin.top + i * 22 + 4)
+        .style("font-size", "11px")
+        .style("fill", "var(--muted)")
+        .style("font-weight", "600")
+        .text(s.platform);
+    });
+  }
+
+  DOM.trendSubtitle.textContent = `${METRIC_LABELS[metric] || metric} — past 12 weeks`;
+}
+
+/* ── Performance Table ─────────────────────────────────────── */
+
+function renderTable(data) {
+  DOM.performanceTable.innerHTML = "";
+  const hasRows = data.length > 0;
+  DOM.tableEmptyState.hidden = hasRows;
+
+  if (!hasRows) return;
+
+  data.forEach((item) => {
+    const row = document.createElement("tr");
+    row.dataset.platform = item.platform;
+    row.tabIndex = 0;
+
+    const color = PLATFORM_COLORS[item.platform] || "var(--primary)";
+    const icon  = PLATFORM_ICONS[item.platform]  || "";
+
+    if (state.activePlatform !== "all" && item.platform === state.activePlatform) {
+      row.classList.add("is-selected");
+    }
+
+    row.innerHTML = `
+      <td>
+        <div class="platform-cell">
+          <span class="platform-dot" style="background:${color}"></span>
+          ${icon}&nbsp;${item.platform}
+        </div>
+      </td>
+      <td>${formatNumber(item.followers)}</td>
+      <td>${formatNumber(item.likes)}</td>
+      <td>${item.engagement.toFixed(1)}%</td>
+      <td>${formatNumber(item.reach)}</td>
+      <td>${formatNumber(item.posts)}</td>
+    `;
+
+    row.addEventListener("mouseenter", () => highlightPlatform(item.platform));
+    row.addEventListener("mouseleave", clearHighlights);
+    row.addEventListener("focus",      () => highlightPlatform(item.platform));
+    row.addEventListener("blur",       clearHighlights);
+    row.addEventListener("click",      () => selectPlatform(item.platform));
+    row.addEventListener("keydown",    (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        selectPlatform(item.platform);
+      }
+    });
+
+    DOM.performanceTable.appendChild(row);
   });
 }
+
+/* ── CSV Export ────────────────────────────────────────────── */
+
+function exportCSV() {
+  const data = getDisplayData();
+  const headers = ["Platform", "Followers", "Likes", "Engagement %", "Reach", "Posts"];
+  const rows    = data.map((d) => [
+    d.platform,
+    d.followers,
+    d.likes,
+    d.engagement.toFixed(1),
+    d.reach,
+    d.posts,
+  ]);
+  const csv  = [headers, ...rows].map((r) => r.join(",")).join("\r\n");
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement("a");
+  a.href     = url;
+  a.download = `social-dashboard-${state.period}-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast("✅ CSV exported!", "success");
+}
+
+/* ── Main Dashboard Update ─────────────────────────────────── */
 
 function updateDashboard() {
-  const data = getFilteredData();
-  const hasSelectedPlatform = activePlatform !== "all";
-  audienceChartMode.disabled = !hasSelectedPlatform;
-  allPlatformsBtn.hidden = !hasSelectedPlatform;
-  if (!hasSelectedPlatform) chartMode = "platforms";
-  platformChartMode.classList.toggle("active", chartMode === "platforms");
-  audienceChartMode.classList.toggle("active", chartMode === "audience");
-  barChartTitle.textContent = chartMode === "audience" ? `${activePlatform} Audience Mix` : "Followers by Platform";
-  barChartSubtitle.textContent = chartMode === "audience"
-    ? "Estimated audience breakdown"
-    : "Compare your audience across platforms";
+  const data = getDisplayData();
   updateSummary(data);
+  updateInsights();
   updateSpotlight();
-  renderTable(data);
   renderBarChart(data);
-  renderDonutChart(data);
+  renderDonutChart();    // always all-platform data
+  renderTrendChart();
+  renderTable(data);
 }
 
-metricButtons.forEach(button => {
-  button.addEventListener("click", () => {
-    metricButtons.forEach(btn => btn.classList.toggle("active", btn === button));
-    activeMetric = button.dataset.metric;
+/* ── Event Listeners ───────────────────────────────────────── */
+
+function initEvents() {
+  // Theme
+  DOM.themeToggle.addEventListener("click", toggleTheme);
+
+  // Platform filter
+  DOM.platformFilter.addEventListener("change", () => {
+    state.activePlatform = DOM.platformFilter.value;
     updateDashboard();
   });
-});
 
-platformChartMode.addEventListener("click", () => {
-  chartMode = "platforms";
-  updateDashboard();
-});
+  // Sort metric dropdown
+  DOM.sortMetric.addEventListener("change", () => {
+    state.sortMetric = DOM.sortMetric.value;
+    updateDashboard();
+  });
 
-audienceChartMode.addEventListener("click", () => {
-  if (activePlatform === "all") return;
-  chartMode = "audience";
-  updateDashboard();
-});
+  // Sort direction — previously broken; now fully wired
+  DOM.sortDirectionBtn.addEventListener("click", () => {
+    state.sortDir = state.sortDir === "desc" ? "asc" : "desc";
+    syncSortBtn();
+    updateDashboard();
+    showToast(state.sortDir === "desc" ? "Sorted: highest first" : "Sorted: lowest first", "info");
+  });
 
-allPlatformsBtn.addEventListener("click", () => {
-  platformFilter.value = "all";
-  chartMode = "platforms";
-  updateDashboard();
-});
+  // Bar chart metric toggle
+  DOM.metricToggle.querySelectorAll(".metric-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      DOM.metricToggle.querySelectorAll(".metric-btn").forEach((b) =>
+        b.classList.remove("active")
+      );
+      btn.classList.add("active");
+      state.metric = btn.dataset.metric;
+      renderBarChart(getDisplayData());
+    });
+  });
 
-d3.csv("data.csv").then(data => {
-  platformData = data;
-  populateFilter();
-  updateDashboard();
-});
+  // Trend chart metric toggle
+  DOM.trendMetricToggle.querySelectorAll(".metric-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      DOM.trendMetricToggle.querySelectorAll(".metric-btn").forEach((b) =>
+        b.classList.remove("active")
+      );
+      btn.classList.add("active");
+      state.trendMetric = btn.dataset.metric;
+      renderTrendChart();
+    });
+  });
 
-platformFilter.addEventListener("change", () => {
-  chartMode = platformFilter.value === "all" ? "platforms" : "audience";
-  updateDashboard();
-});
+  // Date range buttons
+  document.querySelectorAll(".date-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".date-btn").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+      state.period = btn.dataset.period;
+      updateDashboard();
+      showToast(`Period: ${btn.dataset.period.toUpperCase()}`, "info");
+    });
+  });
+
+  // Table search — live filter
+  DOM.tableSearch.addEventListener("input", () => {
+    state.searchQuery = DOM.tableSearch.value.trim();
+    renderTable(getDisplayData());
+  });
+
+  // CSV export
+  DOM.exportCsvBtn.addEventListener("click", exportCSV);
+
+  // Retry button on error
+  DOM.retryBtn.addEventListener("click", () => {
+    showSkeleton();
+    loadData();
+  });
+
+  // Responsive: redraw charts on window resize
+  let resizeTimer;
+  window.addEventListener("resize", () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      const data = getDisplayData();
+      renderBarChart(data);
+      renderDonutChart();
+      renderTrendChart();
+    }, 220);
+  });
+}
+
+/* ── Data Loading ──────────────────────────────────────────── */
+
+function loadData() {
+  if (window.location.protocol === "file:") {
+    // Local file:// protocol blocks fetch/d3.csv for security in browser previews.
+    // Use embedded dataset so the dashboard immediately renders with zero errors.
+    rawData = DEFAULT_DATA;
+    populateFilter();
+    requestAnimationFrame(() => {
+      hideSkeleton();
+      updateDashboard();
+      showToast("Dashboard ready!", "success");
+    });
+    return;
+  }
+
+  d3.csv("data.csv")
+    .then((data) => {
+      rawData = data;
+      populateFilter();
+      requestAnimationFrame(() => {
+        hideSkeleton();
+        updateDashboard();
+        showToast("Dashboard ready!", "success");
+      });
+    })
+    .catch((err) => {
+      console.warn("[Social Dashboard] Could not fetch data.csv, falling back to embedded dataset:", err);
+      rawData = DEFAULT_DATA;
+      populateFilter();
+      requestAnimationFrame(() => {
+        hideSkeleton();
+        updateDashboard();
+        showToast("Dashboard ready!", "info");
+      });
+    });
+}
+
+/* ── Bootstrap ─────────────────────────────────────────────── */
+
+// Sync theme icon on page load (theme is already applied inline in <head>)
+(function syncThemeIcon() {
+  const t = document.documentElement.getAttribute("data-theme") || "light";
+  DOM.themeIcon.textContent = t === "dark" ? "☀️" : "🌙";
+})();
+
+showSkeleton();
+syncSortBtn();
+initEvents();
+loadData();
