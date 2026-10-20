@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en" data-theme="light">
   <head>
     <meta charset="UTF-8" />
@@ -86,13 +86,24 @@
             <button class="date-btn" data-period="90d" type="button">90D</button>
           </div>
 
+          <!-- Keyboard Shortcuts Button -->
+          <button
+            id="shortcutsBtn"
+            class="shortcuts-btn"
+            type="button"
+            aria-label="View keyboard shortcuts"
+            title="Keyboard Shortcuts (?)"
+          >
+            ⌨️&nbsp;Shortcuts
+          </button>
+
           <!-- Dark Mode Toggle -->
           <button
             id="themeToggle"
             class="theme-toggle"
             type="button"
             aria-label="Toggle dark mode"
-            title="Toggle dark/light mode"
+            title="Toggle dark/light mode (Press T)"
           >
             <span id="themeIcon">🌙</span>
           </button>
@@ -101,35 +112,39 @@
 
       <!-- ── Summary Cards ─────────────────────── -->
       <section class="stats" aria-label="Summary statistics">
-        <article class="card card--highlight">
+        <article class="card card--interactive active" data-metric="followers" title="Click to view Followers on charts" tabindex="0" role="button">
           <div class="card-icon" aria-hidden="true">👥</div>
           <p class="card-label">Total Followers</p>
           <p class="card-value" id="followersValue">–</p>
+          <span class="card-hint">Click to plot</span>
         </article>
 
-        <article class="card">
+        <article class="card card--interactive" data-metric="likes" title="Click to view Likes on charts" tabindex="0" role="button">
           <div class="card-icon" aria-hidden="true">❤️</div>
           <p class="card-label">Total Likes</p>
           <p class="card-value" id="likesValue">–</p>
-        </
-        article>
+          <span class="card-hint">Click to plot</span>
+        </article>
 
-        <article class="card">
+        <article class="card card--interactive" data-metric="engagement" title="Click to view Engagement on charts" tabindex="0" role="button">
           <div class="card-icon" aria-hidden="true">📊</div>
           <p class="card-label">Avg Engagement</p>
           <p class="card-value" id="engagementValue">–</p>
+          <span class="card-hint">Click to plot</span>
         </article>
 
-        <article class="card">
+        <article class="card card--interactive" data-metric="reach" title="Click to view Reach on charts" tabindex="0" role="button">
           <div class="card-icon" aria-hidden="true">📡</div>
           <p class="card-label">Total Reach</p>
           <p class="card-value" id="reachValue">–</p>
+          <span class="card-hint">Click to plot</span>
         </article>
 
-        <article class="card">
+        <article class="card" id="topPlatformCard">
           <div class="card-icon" aria-hidden="true">🏆</div>
           <p class="card-label">Top Platform</p>
           <p class="card-value card-value--sm" id="topPlatformValue">–</p>
+          <span class="card-hint">Leader</span>
         </article>
       </section>
 
@@ -165,8 +180,15 @@
         aria-label="Platform spotlight"
       >
         <div class="spotlight-heading">
-          <p class="eyebrow">Platform spotlight</p>
-          <h2 id="spotlightTitle">Select a platform</h2>
+          <div class="spotlight-title-row">
+            <div>
+              <p class="eyebrow">Platform spotlight</p>
+              <h2 id="spotlightTitle">Select a platform</h2>
+            </div>
+            <button id="spotlightClearBtn" class="spotlight-clear-btn" type="button" hidden title="Clear platform selection (Esc)">
+              ✕ Clear Filter
+            </button>
+          </div>
           <p id="spotlightDescription">
             Click any bar, donut slice, legend item, or table row to see a
             detailed breakdown.
@@ -310,6 +332,253 @@
         ></div>
       </article>
 
+      <!-- ── Interactive Strategy & Comparison Hub ── -->
+      <article class="panel panel--full interactive-hub-panel" id="interactiveHub" aria-label="Interactive Strategy and Comparison Hub">
+        <div class="panel-header hub-panel-header">
+          <div class="hub-header-text">
+            <div class="hub-badge-row">
+              <span class="hub-pill">⚡ Interactive Display</span>
+              <span class="hub-pill-sub">Real-Time Analytics & Simulation Lab</span>
+            </div>
+            <h2 id="hubMainTitle">Platform Comparison Arena & What-If Simulator</h2>
+            <p class="chart-subtitle" id="hubSubtitle">
+              Benchmark platforms head-to-head or simulate campaign growth with reactive mathematical modeling.
+            </p>
+          </div>
+
+          <!-- Mode Switcher Tabs -->
+          <div class="hub-tabs" role="tablist" aria-label="Interactive display mode">
+            <button class="hub-tab active" id="tabArena" data-tab="arena" role="tab" aria-selected="true" type="button">
+              ⚔️ Comparison Arena
+            </button>
+            <button class="hub-tab" id="tabSimulator" data-tab="simulator" role="tab" aria-selected="false" type="button">
+              🚀 What-If Simulator
+            </button>
+          </div>
+        </div>
+
+        <!-- ── TAB 1: Comparison Arena ── -->
+        <div class="hub-view active" id="arenaView" role="tabpanel" aria-labelledby="tabArena">
+          <!-- Platform Pickers Bar -->
+          <div class="arena-picker-strip">
+            <div class="picker-group">
+              <label for="arenaPlatformA" class="picker-label">Platform A</label>
+              <select id="arenaPlatformA" class="select picker-select" aria-label="Select first platform">
+              </select>
+            </div>
+
+            <button id="arenaSwapBtn" class="arena-swap-btn" type="button" title="Swap Platform A and B" aria-label="Swap Platform A and Platform B">
+              ⇄ Swap
+            </button>
+
+            <div class="picker-group">
+              <label for="arenaPlatformB" class="picker-label">Platform B</label>
+              <select id="arenaPlatformB" class="select picker-select" aria-label="Select second platform">
+              </select>
+            </div>
+          </div>
+
+          <!-- Comparison Battle Cards -->
+          <div class="arena-battleground">
+            <!-- Platform A Card -->
+            <div class="arena-side-card" id="arenaCardA">
+              <div class="arena-platform-badge" id="arenaBadgeA">
+                <span class="arena-avatar" id="arenaAvatarA">▶️</span>
+                <div>
+                  <h3 class="arena-name" id="arenaNameA">YouTube</h3>
+                  <span class="arena-score" id="arenaScoreA">Calculating...</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Center VS Callout -->
+            <div class="arena-vs-callout">
+              <span class="vs-circle">VS</span>
+              <span class="vs-sub">Battle</span>
+            </div>
+
+            <!-- Platform B Card -->
+            <div class="arena-side-card" id="arenaCardB">
+              <div class="arena-platform-badge" id="arenaBadgeB">
+                <span class="arena-avatar" id="arenaAvatarB">🎵</span>
+                <div>
+                  <h3 class="arena-name" id="arenaNameB">TikTok</h3>
+                  <span class="arena-score" id="arenaScoreB">Calculating...</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Comparative Metrics Matrix -->
+          <div class="arena-matrix" id="arenaMatrix">
+            <!-- Dynamically generated rows -->
+          </div>
+
+          <!-- Analytical Takeaway / Dynamic AI Synthesis -->
+          <div class="arena-insight-box" id="arenaInsightBox">
+            <div class="insight-spark-icon">💡</div>
+            <div class="insight-spark-body">
+              <strong>Strategic Verdict & Analysis:</strong>
+              <p id="arenaVerdictText">Analyzing comparative performance metrics...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── TAB 2: What-If Growth Simulator ── -->
+        <div class="hub-view" id="simulatorView" role="tabpanel" aria-labelledby="tabSimulator" hidden>
+          <div class="sim-layout">
+            <!-- Left Controls: Parameters & Presets -->
+            <div class="sim-controls-pane">
+              <div class="sim-section-header">
+                <h3>Scenario Controls</h3>
+                <span class="sim-badge">Live Reactive</span>
+              </div>
+
+              <!-- Quick Presets -->
+              <div class="sim-presets-group">
+                <span class="sim-label">Quick Scenario Presets:</span>
+                <div class="sim-presets">
+                  <button type="button" class="preset-btn" data-preset="viral">🔥 Viral Push</button>
+                  <button type="button" class="preset-btn" data-preset="organic">🌱 Steady Organic</button>
+                  <button type="button" class="preset-btn" data-preset="creator">✨ Creator Boost</button>
+                  <button type="button" class="preset-btn active" data-preset="custom">⚙️ Custom</button>
+                </div>
+              </div>
+
+              <!-- Target Platform Selector -->
+              <div class="sim-field">
+                <label for="simTargetPlatform" class="sim-label">Target Platform:</label>
+                <select id="simTargetPlatform" class="select" aria-label="Select target platform to simulate">
+                  <option value="all">Entire Portfolio (All Platforms)</option>
+                </select>
+              </div>
+
+              <!-- Slider 1: Monthly Post Frequency -->
+              <div class="sim-slider-field">
+                <div class="slider-header">
+                  <label for="simPostSlider" class="sim-label">Posting Frequency</label>
+                  <span class="slider-val-badge" id="simPostBadge">1.5x (+50%)</span>
+                </div>
+                <input type="range" id="simPostSlider" class="sim-range" min="0.5" max="3.0" step="0.1" value="1.5" />
+                <div class="slider-ticks">
+                  <span>0.5x (Relaxed)</span>
+                  <span>1.0x (Current)</span>
+                  <span>2.0x (Double)</span>
+                  <span>3.0x (Hyper)</span>
+                </div>
+              </div>
+
+              <!-- Slider 2: Paid Promotion / Boost Factor -->
+              <div class="sim-slider-field">
+                <div class="slider-header">
+                  <label for="simBoostSlider" class="sim-label">Promotion & Boost Factor</label>
+                  <span class="slider-val-badge" id="simBoostBadge">+25% Boost</span>
+                </div>
+                <input type="range" id="simBoostSlider" class="sim-range" min="0" max="100" step="5" value="25" />
+                <div class="slider-ticks">
+                  <span>0% (Organic)</span>
+                  <span>25% (Light)</span>
+                  <span>50% (Standard)</span>
+                  <span>100% (Max)</span>
+                </div>
+              </div>
+
+              <!-- Slider 3: Engagement Quality Shift -->
+              <div class="sim-slider-field">
+                <div class="slider-header">
+                  <label for="simEngagementSlider" class="sim-label">Audience Retention Shift</label>
+                  <span class="slider-val-badge" id="simEngagementBadge">+10% Quality</span>
+                </div>
+                <input type="range" id="simEngagementSlider" class="sim-range" min="-30" max="50" step="5" value="10" />
+                <div class="slider-ticks">
+                  <span>-30% (Fatigue)</span>
+                  <span>0% (Neutral)</span>
+                  <span>+25% (High Viral)</span>
+                  <span>+50% (Peak)</span>
+                </div>
+              </div>
+
+              <button type="button" class="sim-reset-btn" id="simResetBtn">
+                ↺ Reset Parameters
+              </button>
+            </div>
+
+            <!-- Right Results: Dynamic Projections -->
+            <div class="sim-results-pane">
+              <div class="sim-results-header">
+                <div>
+                  <h3>30-Day Simulated Forecast</h3>
+                  <p class="sim-sub">Projected impact based on selected scenario inputs</p>
+                </div>
+                <span class="sim-growth-chip" id="simGrowthChip">+38.2% Growth Index</span>
+              </div>
+
+              <!-- KPI Comparison Cards -->
+              <div class="sim-kpi-grid">
+                <div class="sim-kpi-card">
+                  <span class="sim-kpi-label">Projected Reach</span>
+                  <div class="sim-kpi-values">
+                    <strong class="sim-projected-val" id="simProjReach">–</strong>
+                    <span class="sim-base-val" id="simBaseReach">from –</span>
+                  </div>
+                  <div class="sim-progress-track">
+                    <span class="sim-progress-fill" id="simReachBar"></span>
+                  </div>
+                  <small class="sim-delta positive" id="simReachDelta">+0% Lift</small>
+                </div>
+
+                <div class="sim-kpi-card">
+                  <span class="sim-kpi-label">Projected Followers</span>
+                  <div class="sim-kpi-values">
+                    <strong class="sim-projected-val" id="simProjFollowers">–</strong>
+                    <span class="sim-base-val" id="simBaseFollowers">from –</span>
+                  </div>
+                  <div class="sim-progress-track">
+                    <span class="sim-progress-fill" id="simFollowersBar"></span>
+                  </div>
+                  <small class="sim-delta positive" id="simFollowersDelta">+0% Lift</small>
+                </div>
+
+                <div class="sim-kpi-card">
+                  <span class="sim-kpi-label">Estimated Likes</span>
+                  <div class="sim-kpi-values">
+                    <strong class="sim-projected-val" id="simProjLikes">–</strong>
+                    <span class="sim-base-val" id="simBaseLikes">from –</span>
+                  </div>
+                  <div class="sim-progress-track">
+                    <span class="sim-progress-fill" id="simLikesBar"></span>
+                  </div>
+                  <small class="sim-delta positive" id="simLikesDelta">+0% Lift</small>
+                </div>
+
+                <div class="sim-kpi-card">
+                  <span class="sim-kpi-label">Projected Engagement</span>
+                  <div class="sim-kpi-values">
+                    <strong class="sim-projected-val" id="simProjEng">–</strong>
+                    <span class="sim-base-val" id="simBaseEng">from –</span>
+                  </div>
+                  <div class="sim-progress-track">
+                    <span class="sim-progress-fill" id="simEngBar"></span>
+                  </div>
+                  <small class="sim-delta positive" id="simEngDelta">+0% Lift</small>
+                </div>
+              </div>
+
+              <!-- Simulation Strategic Summary Note -->
+              <div class="sim-summary-callout" id="simCallout">
+                <span class="sim-callout-icon">🎯</span>
+                <div class="sim-callout-content">
+                  <strong id="simCalloutHeading">Scenario Outlook: High Impact Scaling</strong>
+                  <p id="simCalloutBody">
+                    Increasing post frequency combined with targeted promotion is projected to deliver positive lift across all primary metrics.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+
       <!-- ── Performance Table ──────────────────── -->
       <article class="panel panel--full performance-panel">
         <div class="toolbar" role="toolbar" aria-label="Dashboard controls">
@@ -373,12 +642,24 @@
           <table aria-label="Platform performance table">
             <thead>
               <tr>
-                <th>Platform</th>
-                <th>Followers</th>
-                <th>Likes</th>
-                <th>Engagement</th>
-                <th>Reach</th>
-                <th>Posts</th>
+                <th class="sortable-th" data-sort="platform" role="columnheader" tabindex="0" title="Click to sort by Platform">
+                  <span>Platform</span><span class="th-sort-icon">↕</span>
+                </th>
+                <th class="sortable-th" data-sort="followers" role="columnheader" tabindex="0" title="Click to sort by Followers">
+                  <span>Followers</span><span class="th-sort-icon">↕</span>
+                </th>
+                <th class="sortable-th" data-sort="likes" role="columnheader" tabindex="0" title="Click to sort by Likes">
+                  <span>Likes</span><span class="th-sort-icon">↕</span>
+                </th>
+                <th class="sortable-th" data-sort="engagement" role="columnheader" tabindex="0" title="Click to sort by Engagement">
+                  <span>Engagement</span><span class="th-sort-icon">↕</span>
+                </th>
+                <th class="sortable-th" data-sort="reach" role="columnheader" tabindex="0" title="Click to sort by Reach">
+                  <span>Reach</span><span class="th-sort-icon">↕</span>
+                </th>
+                <th class="sortable-th" data-sort="posts" role="columnheader" tabindex="0" title="Click to sort by Posts">
+                  <span>Posts</span><span class="th-sort-icon">↕</span>
+                </th>
               </tr>
             </thead>
             <tbody id="performanceTable"></tbody>
@@ -389,6 +670,42 @@
         </div>
       </article>
     </main>
+
+    <!-- ── Keyboard Shortcuts Modal ──────────────── -->
+    <div id="shortcutsModal" class="modal-overlay" hidden role="dialog" aria-modal="true" aria-label="Keyboard Shortcuts">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3>⌨️ Keyboard Shortcuts</h3>
+          <button id="closeShortcutsBtn" class="modal-close-btn" type="button" aria-label="Close shortcuts modal">✕</button>
+        </div>
+        <div class="shortcuts-list">
+          <div class="shortcut-row">
+            <kbd>/</kbd>
+            <span>Focus Table Search</span>
+          </div>
+          <div class="shortcut-row">
+            <kbd>T</kbd>
+            <span>Toggle Dark / Light Mode</span>
+          </div>
+          <div class="shortcut-row">
+            <div class="kbd-group"><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd></div>
+            <span>Switch Time Period (7D / 30D / 90D)</span>
+          </div>
+          <div class="shortcut-row">
+            <kbd>C</kbd>
+            <span>Switch to Comparison Arena</span>
+          </div>
+          <div class="shortcut-row">
+            <kbd>S</kbd>
+            <span>Switch to Growth Simulator</span>
+          </div>
+          <div class="shortcut-row">
+            <kbd>Esc</kbd>
+            <span>Reset Active Platform / Close Modal</span>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- Chart Tooltip -->
     <div

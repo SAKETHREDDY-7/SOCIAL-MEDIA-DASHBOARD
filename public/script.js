@@ -73,6 +73,14 @@ const state = {
   sortDir: "desc",
   activePlatform: "all",
   searchQuery: "",
+  arenaPlatformA: "YouTube",
+  arenaPlatformB: "TikTok",
+  activeHubTab: "arena",
+  simTargetPlatform: "all",
+  simPostFactor: 1.5,
+  simBoostFactor: 25,
+  simEngagementShift: 10,
+  simPreset: "custom",
 };
 
 const DEFAULT_DATA = [
@@ -93,57 +101,103 @@ let rawData = [];
 const $ = (id) => document.getElementById(id);
 
 const DOM = {
-  loadingSkeleton:          $("loadingSkeleton"),
-  errorBanner:              $("errorBanner"),
-  retryBtn:                 $("retryBtn"),
-  mainContent:              $("mainContent"),
-  themeToggle:              $("themeToggle"),
-  themeIcon:                $("themeIcon"),
-  platformFilter:           $("platformFilter"),
-  sortMetric:               $("sortMetric"),
-  sortDirectionBtn:         $("sortDirectionBtn"),
-  metricToggle:             $("metricToggle"),
-  trendMetricToggle:        $("trendMetricToggle"),
-  followersValue:           $("followersValue"),
-  likesValue:               $("likesValue"),
-  engagementValue:          $("engagementValue"),
-  reachValue:               $("reachValue"),
-  topPlatformValue:         $("topPlatformValue"),
-  bestPerformerValue:       $("bestPerformerValue"),
-  bestPerformerMeta:        $("bestPerformerMeta"),
-  engagementLeaderValue:    $("engagementLeaderValue"),
-  engagementLeaderMeta:     $("engagementLeaderMeta"),
-  likesLeaderValue:         $("likesLeaderValue"),
-  likesLeaderMeta:          $("likesLeaderMeta"),
-  reachLeaderValue:         $("reachLeaderValue"),
-  reachLeaderMeta:          $("reachLeaderMeta"),
-  spotlightTitle:           $("spotlightTitle"),
-  spotlightDescription:     $("spotlightDescription"),
-  spotlightMetrics:         $("spotlightMetrics"),
-  spotlightFollowers:       $("spotlightFollowers"),
-  spotlightLikes:           $("spotlightLikes"),
-  spotlightEngagement:      $("spotlightEngagement"),
-  spotlightReach:           $("spotlightReach"),
+  loadingSkeleton:            $("loadingSkeleton"),
+  errorBanner:                $("errorBanner"),
+  retryBtn:                   $("retryBtn"),
+  mainContent:                $("mainContent"),
+  shortcutsBtn:               $("shortcutsBtn"),
+  shortcutsModal:             $("shortcutsModal"),
+  closeShortcutsBtn:          $("closeShortcutsBtn"),
+  themeToggle:                $("themeToggle"),
+  themeIcon:                  $("themeIcon"),
+  platformFilter:             $("platformFilter"),
+  sortMetric:                 $("sortMetric"),
+  sortDirectionBtn:           $("sortDirectionBtn"),
+  metricToggle:               $("metricToggle"),
+  trendMetricToggle:          $("trendMetricToggle"),
+  followersValue:             $("followersValue"),
+  likesValue:                 $("likesValue"),
+  engagementValue:            $("engagementValue"),
+  reachValue:                 $("reachValue"),
+  topPlatformValue:           $("topPlatformValue"),
+  bestPerformerValue:         $("bestPerformerValue"),
+  bestPerformerMeta:          $("bestPerformerMeta"),
+  engagementLeaderValue:      $("engagementLeaderValue"),
+  engagementLeaderMeta:       $("engagementLeaderMeta"),
+  likesLeaderValue:           $("likesLeaderValue"),
+  likesLeaderMeta:            $("likesLeaderMeta"),
+  reachLeaderValue:           $("reachLeaderValue"),
+  reachLeaderMeta:            $("reachLeaderMeta"),
+  spotlightTitle:             $("spotlightTitle"),
+  spotlightClearBtn:          $("spotlightClearBtn"),
+  spotlightDescription:       $("spotlightDescription"),
+  spotlightMetrics:           $("spotlightMetrics"),
+  spotlightFollowers:         $("spotlightFollowers"),
+  spotlightLikes:             $("spotlightLikes"),
+  spotlightEngagement:        $("spotlightEngagement"),
+  spotlightReach:             $("spotlightReach"),
   spotlightFollowersContext:  $("spotlightFollowersContext"),
   spotlightLikesContext:      $("spotlightLikesContext"),
   spotlightEngagementContext: $("spotlightEngagementContext"),
   spotlightReachContext:      $("spotlightReachContext"),
-  spotlightFollowersBar:    $("spotlightFollowersBar"),
-  spotlightLikesBar:        $("spotlightLikesBar"),
-  spotlightEngagementBar:   $("spotlightEngagementBar"),
-  spotlightReachBar:        $("spotlightReachBar"),
-  barChartTitle:            $("barChartTitle"),
-  barChartSubtitle:         $("barChartSubtitle"),
-  donutChartTitle:          $("donutChartTitle"),
-  donutChartSubtitle:       $("donutChartSubtitle"),
-  trendSubtitle:            $("trendSubtitle"),
-  legend:                   $("legend"),
-  performanceTable:         $("performanceTable"),
-  tableSearch:              $("tableSearch"),
-  tableEmptyState:          $("tableEmptyState"),
-  exportCsvBtn:             $("exportCsvBtn"),
-  chartTooltip:             $("chartTooltip"),
-  toastContainer:           $("toastContainer"),
+  spotlightFollowersBar:      $("spotlightFollowersBar"),
+  spotlightLikesBar:          $("spotlightLikesBar"),
+  spotlightEngagementBar:     $("spotlightEngagementBar"),
+  spotlightReachBar:          $("spotlightReachBar"),
+  barChartTitle:              $("barChartTitle"),
+  barChartSubtitle:           $("barChartSubtitle"),
+  donutChartTitle:            $("donutChartTitle"),
+  donutChartSubtitle:         $("donutChartSubtitle"),
+  trendSubtitle:              $("trendSubtitle"),
+  legend:                     $("legend"),
+  tabArena:                   $("tabArena"),
+  tabSimulator:               $("tabSimulator"),
+  arenaView:                  $("arenaView"),
+  simulatorView:              $("simulatorView"),
+  arenaPlatformA:             $("arenaPlatformA"),
+  arenaPlatformB:             $("arenaPlatformB"),
+  arenaSwapBtn:               $("arenaSwapBtn"),
+  arenaAvatarA:               $("arenaAvatarA"),
+  arenaNameA:                 $("arenaNameA"),
+  arenaScoreA:                $("arenaScoreA"),
+  arenaAvatarB:               $("arenaAvatarB"),
+  arenaNameB:                 $("arenaNameB"),
+  arenaScoreB:                $("arenaScoreB"),
+  arenaMatrix:                $("arenaMatrix"),
+  arenaVerdictText:           $("arenaVerdictText"),
+  simTargetPlatform:          $("simTargetPlatform"),
+  simPostSlider:              $("simPostSlider"),
+  simBoostSlider:             $("simBoostSlider"),
+  simEngagementSlider:        $("simEngagementSlider"),
+  simPostBadge:               $("simPostBadge"),
+  simBoostBadge:              $("simBoostBadge"),
+  simEngagementBadge:         $("simEngagementBadge"),
+  simResetBtn:                $("simResetBtn"),
+  simGrowthChip:              $("simGrowthChip"),
+  simProjReach:               $("simProjReach"),
+  simBaseReach:               $("simBaseReach"),
+  simReachBar:                $("simReachBar"),
+  simReachDelta:              $("simReachDelta"),
+  simProjFollowers:           $("simProjFollowers"),
+  simBaseFollowers:           $("simBaseFollowers"),
+  simFollowersBar:            $("simFollowersBar"),
+  simFollowersDelta:          $("simFollowersDelta"),
+  simProjLikes:               $("simProjLikes"),
+  simBaseLikes:               $("simBaseLikes"),
+  simLikesBar:                $("simLikesBar"),
+  simLikesDelta:              $("simLikesDelta"),
+  simProjEng:                 $("simProjEng"),
+  simBaseEng:                 $("simBaseEng"),
+  simEngBar:                  $("simEngBar"),
+  simEngDelta:                $("simEngDelta"),
+  simCalloutHeading:          $("simCalloutHeading"),
+  simCalloutBody:             $("simCalloutBody"),
+  performanceTable:           $("performanceTable"),
+  tableSearch:                $("tableSearch"),
+  tableEmptyState:            $("tableEmptyState"),
+  exportCsvBtn:               $("exportCsvBtn"),
+  chartTooltip:               $("chartTooltip"),
+  toastContainer:             $("toastContainer"),
 };
 
 /* ── Utility Functions ─────────────────────────────────────── */
@@ -268,13 +322,48 @@ function populateFilter() {
   [...DOM.platformFilter.querySelectorAll("option:not([value='all'])")].forEach(
     (o) => o.remove()
   );
+  if (DOM.simTargetPlatform) {
+    [...DOM.simTargetPlatform.querySelectorAll("option:not([value='all'])")].forEach(
+      (o) => o.remove()
+    );
+  }
+  if (DOM.arenaPlatformA) DOM.arenaPlatformA.innerHTML = "";
+  if (DOM.arenaPlatformB) DOM.arenaPlatformB.innerHTML = "";
 
   rawData.forEach((d) => {
+    const icon = PLATFORM_ICONS[d.platform] || "";
+    const label = `${icon} ${d.platform}`;
+
     const opt = document.createElement("option");
     opt.value = d.platform;
-    opt.textContent = `${PLATFORM_ICONS[d.platform] || ""} ${d.platform}`;
+    opt.textContent = label;
     DOM.platformFilter.appendChild(opt);
+
+    if (DOM.simTargetPlatform) {
+      const optSim = document.createElement("option");
+      optSim.value = d.platform;
+      optSim.textContent = label;
+      DOM.simTargetPlatform.appendChild(optSim);
+    }
+
+    if (DOM.arenaPlatformA) {
+      const optA = document.createElement("option");
+      optA.value = d.platform;
+      optA.textContent = label;
+      DOM.arenaPlatformA.appendChild(optA);
+    }
+
+    if (DOM.arenaPlatformB) {
+      const optB = document.createElement("option");
+      optB.value = d.platform;
+      optB.textContent = label;
+      DOM.arenaPlatformB.appendChild(optB);
+    }
   });
+
+  if (DOM.arenaPlatformA) DOM.arenaPlatformA.value = state.arenaPlatformA;
+  if (DOM.arenaPlatformB) DOM.arenaPlatformB.value = state.arenaPlatformB;
+  if (DOM.simTargetPlatform) DOM.simTargetPlatform.value = state.simTargetPlatform;
 }
 
 /* ── Animated Counter ──────────────────────────────────────── */
@@ -353,8 +442,11 @@ function updateSpotlight() {
     DOM.spotlightDescription.textContent =
       "Click any bar, donut slice, legend item, or table row to see a detailed breakdown.";
     DOM.spotlightMetrics.hidden = true;
+    if (DOM.spotlightClearBtn) DOM.spotlightClearBtn.hidden = true;
     return;
   }
+
+  if (DOM.spotlightClearBtn) DOM.spotlightClearBtn.hidden = false;
 
   const totalFollowers = d3.sum(all, (d) => d.followers) || 1;
   const totalLikes     = d3.sum(all, (d) => d.likes)     || 1;
@@ -485,7 +577,23 @@ function selectPlatform(name) {
   }
 }
 
-/* ── Sort Direction Button ─────────────────────────────────── */
+/* ── Sort Direction & Header Sync ──────────────────────────── */
+
+function syncSortHeaders() {
+  document.querySelectorAll(".sortable-th").forEach((th) => {
+    const col = th.dataset.sort;
+    const icon = th.querySelector(".th-sort-icon");
+    if (col === state.sortMetric) {
+      th.classList.add("active-sort");
+      if (icon) icon.textContent = state.sortDir === "asc" ? "▲" : "▼";
+      th.setAttribute("aria-sort", state.sortDir === "asc" ? "ascending" : "descending");
+    } else {
+      th.classList.remove("active-sort");
+      if (icon) icon.textContent = "↕";
+      th.removeAttribute("aria-sort");
+    }
+  });
+}
 
 function syncSortBtn() {
   if (state.sortDir === "desc") {
@@ -497,6 +605,7 @@ function syncSortBtn() {
     DOM.sortDirectionBtn.classList.add("is-asc");
     DOM.sortDirectionBtn.setAttribute("aria-label", "Sort direction: ascending — click to switch to descending");
   }
+  syncSortHeaders();
 }
 
 /* ── Bar Chart ─────────────────────────────────────────────── */
@@ -1140,6 +1249,271 @@ function exportCSV() {
   showToast("✅ CSV exported!", "success");
 }
 
+/* ── Comparison Arena ──────────────────────────────────────── */
+
+function renderArena() {
+  if (!rawData.length || !DOM.arenaMatrix) return;
+  const all = getScaledData();
+  if (!all.length) return;
+
+  const platA = all.find((d) => d.platform === state.arenaPlatformA) || all[0];
+  const platB = all.find((d) => d.platform === state.arenaPlatformB) || all[1] || all[0];
+
+  const iconA = PLATFORM_ICONS[platA.platform] || "";
+  const iconB = PLATFORM_ICONS[platB.platform] || "";
+  const colorA = PLATFORM_COLORS[platA.platform] || "var(--primary)";
+  const colorB = PLATFORM_COLORS[platB.platform] || "#f59e0b";
+
+  DOM.arenaAvatarA.textContent = iconA;
+  DOM.arenaNameA.textContent = platA.platform;
+  DOM.arenaAvatarB.textContent = iconB;
+  DOM.arenaNameB.textContent = platB.platform;
+
+  DOM.arenaPlatformA.value = platA.platform;
+  DOM.arenaPlatformB.value = platB.platform;
+
+  const likesPerPostA = platA.posts > 0 ? Math.round(platA.likes / platA.posts) : 0;
+  const likesPerPostB = platB.posts > 0 ? Math.round(platB.likes / platB.posts) : 0;
+
+  const metrics = [
+    {
+      id: "followers",
+      label: "Total Followers",
+      valA: platA.followers,
+      valB: platB.followers,
+      format: formatNumber,
+      isHigherBetter: true,
+    },
+    {
+      id: "engagement",
+      label: "Engagement Rate",
+      valA: platA.engagement,
+      valB: platB.engagement,
+      format: (v) => `${Number(v).toFixed(1)}%`,
+      isHigherBetter: true,
+    },
+    {
+      id: "reach",
+      label: "Estimated Reach",
+      valA: platA.reach,
+      valB: platB.reach,
+      format: formatNumber,
+      isHigherBetter: true,
+    },
+    {
+      id: "likes",
+      label: "Total Likes",
+      valA: platA.likes,
+      valB: platB.likes,
+      format: formatNumber,
+      isHigherBetter: true,
+    },
+    {
+      id: "posts",
+      label: "Active Posts",
+      valA: platA.posts,
+      valB: platB.posts,
+      format: formatNumber,
+      isHigherBetter: true,
+    },
+    {
+      id: "likesPerPost",
+      label: "Likes / Post (ROI)",
+      valA: likesPerPostA,
+      valB: likesPerPostB,
+      format: formatNumber,
+      isHigherBetter: true,
+    },
+  ];
+
+  let winsA = 0;
+  let winsB = 0;
+
+  DOM.arenaMatrix.innerHTML = "";
+
+  metrics.forEach((m) => {
+    const isTie = m.valA === m.valB;
+    const aWins = !isTie && (m.isHigherBetter ? m.valA > m.valB : m.valA < m.valB);
+    const bWins = !isTie && !aWins;
+
+    if (aWins) winsA++;
+    if (bWins) winsB++;
+
+    const sum = (Number(m.valA) || 0) + (Number(m.valB) || 0) || 1;
+    const pctA = Math.max(12, Math.min(88, ((Number(m.valA) / sum) * 100)));
+    const pctB = 100 - pctA;
+
+    let deltaText = "";
+    if (aWins && m.valB > 0) {
+      const diff = (((m.valA - m.valB) / m.valB) * 100).toFixed(0);
+      deltaText = `👑 ${platA.platform} (+${diff}%)`;
+    } else if (bWins && m.valA > 0) {
+      const diff = (((m.valB - m.valA) / m.valA) * 100).toFixed(0);
+      deltaText = `👑 ${platB.platform} (+${diff}%)`;
+    } else {
+      deltaText = `🤝 Even`;
+    }
+
+    const row = document.createElement("div");
+    row.className = "arena-row";
+    row.innerHTML = `
+      <span class="arena-metric-title">${m.label}</span>
+      <span class="arena-val arena-val-a ${aWins ? "is-winner" : ""}">${m.format(m.valA)}</span>
+      <div class="arena-meter-wrap" title="${platA.platform}: ${pctA.toFixed(0)}% vs ${platB.platform}: ${pctB.toFixed(0)}%">
+        <span class="arena-meter-a" style="width: ${pctA}%; background: ${colorA};"></span>
+        <span class="arena-meter-b" style="width: ${pctB}%; background: ${colorB};"></span>
+      </div>
+      <span class="arena-val arena-val-b ${bWins ? "is-winner" : ""}">${m.format(m.valB)}</span>
+      <span class="arena-winner-tag ${aWins ? "winner-a" : bWins ? "winner-b" : "tie"}">${deltaText}</span>
+    `;
+    DOM.arenaMatrix.appendChild(row);
+  });
+
+  DOM.arenaScoreA.textContent = `${winsA} Metric ${winsA === 1 ? "Win" : "Wins"}`;
+  DOM.arenaScoreB.textContent = `${winsB} Metric ${winsB === 1 ? "Win" : "Wins"}`;
+
+  // Formulate dynamic AI synthesis verdict
+  let verdict = "";
+  if (winsA > winsB) {
+    verdict = `<strong>${platA.platform} takes the overall advantage (${winsA} vs ${winsB}).</strong> `;
+  } else if (winsB > winsA) {
+    verdict = `<strong>${platB.platform} takes the overall advantage (${winsB} vs ${winsA}).</strong> `;
+  } else {
+    verdict = `<strong>Both platforms demonstrate balanced strengths (Tied at ${winsA}-${winsB}).</strong> `;
+  }
+
+  if (platA.followers > platB.followers && platB.engagement > platA.engagement) {
+    verdict += `${platA.platform} holds superior audience scale, but ${platB.platform} commands higher audience interaction velocity. Recommendation: Leverage ${platA.platform} for broad top-of-funnel reach and ${platB.platform} for viral community conversion.`;
+  } else if (platB.followers > platA.followers && platA.engagement > platB.engagement) {
+    verdict += `${platB.platform} holds superior audience scale, but ${platA.platform} commands higher engagement density. Recommendation: Deploy brand awareness campaigns on ${platB.platform} and high-intent calls-to-action on ${platA.platform}.`;
+  } else if (likesPerPostA > likesPerPostB) {
+    verdict += `${platA.platform} is delivering ${(likesPerPostA / Math.max(1, likesPerPostB)).toFixed(1)}x more likes per published post, providing higher creative ROI per asset created.`;
+  } else if (likesPerPostB > likesPerPostA) {
+    verdict += `${platB.platform} is delivering ${(likesPerPostB / Math.max(1, likesPerPostA)).toFixed(1)}x more likes per published post, providing higher creative ROI per asset created.`;
+  } else {
+    verdict += `Consider cross-promoting creative assets between ${platA.platform} and ${platB.platform} to capture both passive impression volume and active community interactions.`;
+  }
+
+  DOM.arenaVerdictText.innerHTML = verdict;
+}
+
+/* ── What-If Growth Simulator ──────────────────────────────── */
+
+function renderSimulator() {
+  if (!rawData.length || !DOM.simProjReach) return;
+  const all = getScaledData();
+  if (!all.length) return;
+
+  let targetData = all;
+  const isPortfolio = state.simTargetPlatform === "all";
+  if (!isPortfolio) {
+    targetData = all.filter((d) => d.platform === state.simTargetPlatform);
+  }
+  if (!targetData.length) targetData = all;
+
+  const baseReach = d3.sum(targetData, (d) => d.reach) || 1;
+  const baseFollowers = d3.sum(targetData, (d) => d.followers) || 1;
+  const baseLikes = d3.sum(targetData, (d) => d.likes) || 1;
+  const baseEng = d3.mean(targetData, (d) => d.engagement) || 15;
+
+  const postMult = state.simPostFactor;
+  const boostPct = state.simBoostFactor;
+  const engShift = state.simEngagementShift;
+
+  const reachMult = 1 + (postMult - 1) * 0.72 + (boostPct / 100) * 0.88;
+  const simReach = Math.round(baseReach * Math.max(0.2, reachMult));
+
+  const followerLiftPct = ((postMult - 1) * 0.32 + (boostPct / 100) * 0.42 + (engShift / 100) * 0.22);
+  const simFollowers = Math.round(baseFollowers * Math.max(0.5, 1 + followerLiftPct));
+
+  const simEng = Math.max(1.0, parseFloat((baseEng * (1 + engShift / 100)).toFixed(1)));
+
+  const likeRatio = (simReach / baseReach) * (simEng / baseEng);
+  const simLikes = Math.round(baseLikes * Math.max(0.2, likeRatio));
+
+  const reachLift = ((simReach - baseReach) / baseReach) * 100;
+  const followerLift = ((simFollowers - baseFollowers) / baseFollowers) * 100;
+  const likesLift = ((simLikes - baseLikes) / baseLikes) * 100;
+  const engLift = simEng - baseEng;
+
+  const compositeGrowth = ((reachLift * 0.4) + (followerLift * 0.35) + (likesLift * 0.25));
+
+  DOM.simProjReach.textContent = formatNumber(simReach);
+  DOM.simBaseReach.textContent = `from ${formatNumber(baseReach)}`;
+  DOM.simReachDelta.textContent = `${reachLift >= 0 ? "+" : ""}${reachLift.toFixed(1)}% Lift`;
+  DOM.simReachDelta.className = `sim-delta ${reachLift >= 0 ? "positive" : "negative"}`;
+  DOM.simReachBar.style.width = `${Math.min(100, Math.max(10, 50 + reachLift / 2))}%`;
+
+  DOM.simProjFollowers.textContent = formatNumber(simFollowers);
+  DOM.simBaseFollowers.textContent = `from ${formatNumber(baseFollowers)}`;
+  DOM.simFollowersDelta.textContent = `${followerLift >= 0 ? "+" : ""}${followerLift.toFixed(1)}% Lift`;
+  DOM.simFollowersDelta.className = `sim-delta ${followerLift >= 0 ? "positive" : "negative"}`;
+  DOM.simFollowersBar.style.width = `${Math.min(100, Math.max(10, 50 + followerLift / 2))}%`;
+
+  DOM.simProjLikes.textContent = formatNumber(simLikes);
+  DOM.simBaseLikes.textContent = `from ${formatNumber(baseLikes)}`;
+  DOM.simLikesDelta.textContent = `${likesLift >= 0 ? "+" : ""}${likesLift.toFixed(1)}% Lift`;
+  DOM.simLikesDelta.className = `sim-delta ${likesLift >= 0 ? "positive" : "negative"}`;
+  DOM.simLikesBar.style.width = `${Math.min(100, Math.max(10, 50 + likesLift / 2))}%`;
+
+  DOM.simProjEng.textContent = `${simEng.toFixed(1)}%`;
+  DOM.simBaseEng.textContent = `from ${baseEng.toFixed(1)}%`;
+  DOM.simEngDelta.textContent = `${engLift >= 0 ? "+" : ""}${engLift.toFixed(1)}% Rate`;
+  DOM.simEngDelta.className = `sim-delta ${engLift >= 0 ? "positive" : "negative"}`;
+  DOM.simEngBar.style.width = `${Math.min(100, Math.max(10, (simEng / 30) * 100))}%`;
+
+  DOM.simGrowthChip.textContent = `${compositeGrowth >= 0 ? "+" : ""}${compositeGrowth.toFixed(1)}% Growth Index`;
+  DOM.simGrowthChip.style.background = compositeGrowth >= 0
+    ? "linear-gradient(135deg, #059669 0%, #10b981 100%)"
+    : "linear-gradient(135deg, #dc2626 0%, #ef4444 100%)";
+
+  DOM.simPostBadge.textContent = `${postMult.toFixed(1)}x (${postMult >= 1 ? "+" : ""}${((postMult - 1) * 100).toFixed(0)}%)`;
+  DOM.simBoostBadge.textContent = `+${boostPct}% Boost`;
+  DOM.simEngagementBadge.textContent = `${engShift >= 0 ? "+" : ""}${engShift}% Shift`;
+
+  const scopeName = isPortfolio ? "Entire Portfolio" : state.simTargetPlatform;
+  if (compositeGrowth >= 35) {
+    DOM.simCalloutHeading.textContent = `🚀 High Velocity Campaign (${scopeName})`;
+    DOM.simCalloutBody.textContent = `Aggressive posting cadence (+${((postMult - 1) * 100).toFixed(0)}%) coupled with paid promotion generates massive audience expansion (+${formatNumber(simReach - baseReach)} new reach) with strong viral compounding.`;
+  } else if (compositeGrowth >= 10) {
+    DOM.simCalloutHeading.textContent = `🌱 Sustainable Growth Trajectory (${scopeName})`;
+    DOM.simCalloutBody.textContent = `Steady cadence increases create healthy organic velocity, adding ~${formatNumber(simFollowers - baseFollowers)} followers while maintaining stable community engagement.`;
+  } else if (compositeGrowth >= 0) {
+    DOM.simCalloutHeading.textContent = `⚖️ Balanced Maintenance Mode (${scopeName})`;
+    DOM.simCalloutBody.textContent = `Current simulation preserves existing momentum and minimizes audience fatigue, yielding steady retention across key metrics.`;
+  } else {
+    DOM.simCalloutHeading.textContent = `⚠️ Contraction Warning (${scopeName})`;
+    DOM.simCalloutBody.textContent = `Reducing posting cadence and engagement pull-back risks algorithmic distribution drop. Consider keeping cadence above 1.0x to protect audience reach.`;
+  }
+}
+
+function applySimPreset(presetKey) {
+  state.simPreset = presetKey;
+  document.querySelectorAll(".preset-btn").forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.preset === presetKey);
+  });
+
+  if (presetKey === "viral") {
+    state.simPostFactor = 2.2;
+    state.simBoostFactor = 60;
+    state.simEngagementShift = 25;
+  } else if (presetKey === "organic") {
+    state.simPostFactor = 1.3;
+    state.simBoostFactor = 0;
+    state.simEngagementShift = 10;
+  } else if (presetKey === "creator") {
+    state.simPostFactor = 1.8;
+    state.simBoostFactor = 35;
+    state.simEngagementShift = 30;
+  }
+
+  DOM.simPostSlider.value = state.simPostFactor;
+  DOM.simBoostSlider.value = state.simBoostFactor;
+  DOM.simEngagementSlider.value = state.simEngagementShift;
+
+  renderSimulator();
+}
+
 /* ── Main Dashboard Update ─────────────────────────────────── */
 
 function updateDashboard() {
@@ -1151,6 +1525,9 @@ function updateDashboard() {
   renderDonutChart();    // always all-platform data
   renderTrendChart();
   renderTable(data);
+  syncSortHeaders();
+  renderArena();
+  renderSimulator();
 }
 
 /* ── Event Listeners ───────────────────────────────────────── */
@@ -1168,15 +1545,219 @@ function initEvents() {
   // Sort metric dropdown
   DOM.sortMetric.addEventListener("change", () => {
     state.sortMetric = DOM.sortMetric.value;
+    syncSortHeaders();
     updateDashboard();
   });
 
-  // Sort direction — previously broken; now fully wired
+  // Sort direction button
   DOM.sortDirectionBtn.addEventListener("click", () => {
     state.sortDir = state.sortDir === "desc" ? "asc" : "desc";
     syncSortBtn();
     updateDashboard();
     showToast(state.sortDir === "desc" ? "Sorted: highest first" : "Sorted: lowest first", "info");
+  });
+
+  // Interactive KPI Summary Cards
+  document.querySelectorAll(".card--interactive").forEach((card) => {
+    card.addEventListener("click", () => {
+      const metric = card.dataset.metric;
+      if (!metric) return;
+      state.metric = metric;
+
+      document.querySelectorAll(".card--interactive").forEach((c) =>
+        c.classList.remove("active")
+      );
+      card.classList.add("active");
+
+      DOM.metricToggle.querySelectorAll(".metric-btn").forEach((btn) => {
+        btn.classList.toggle("active", btn.dataset.metric === metric);
+      });
+
+      renderBarChart(getDisplayData());
+      showToast(`📊 Plotted ${METRIC_LABELS[metric] || metric} on Bar Chart`, "info");
+    });
+  });
+
+  // Sortable table headers
+  document.querySelectorAll(".sortable-th").forEach((th) => {
+    const handleSort = () => {
+      const col = th.dataset.sort;
+      if (!col) return;
+
+      if (state.sortMetric === col) {
+        state.sortDir = state.sortDir === "desc" ? "asc" : "desc";
+      } else {
+        state.sortMetric = col;
+        state.sortDir = "desc";
+      }
+
+      DOM.sortMetric.value = col;
+      syncSortBtn();
+      updateDashboard();
+      showToast(`Sorted by ${METRIC_LABELS[col] || col} (${state.sortDir.toUpperCase()})`, "info");
+    };
+
+    th.addEventListener("click", handleSort);
+    th.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        handleSort();
+      }
+    });
+  });
+
+  // Spotlight Clear Filter Button
+  if (DOM.spotlightClearBtn) {
+    DOM.spotlightClearBtn.addEventListener("click", () => {
+      selectPlatform("all");
+      showToast("Viewing all platforms", "info");
+    });
+  }
+
+  // Keyboard Shortcuts Modal Toggle
+  if (DOM.shortcutsBtn && DOM.shortcutsModal && DOM.closeShortcutsBtn) {
+    DOM.shortcutsBtn.addEventListener("click", () => {
+      DOM.shortcutsModal.hidden = false;
+    });
+    DOM.closeShortcutsBtn.addEventListener("click", () => {
+      DOM.shortcutsModal.hidden = true;
+    });
+    DOM.shortcutsModal.addEventListener("click", (e) => {
+      if (e.target === DOM.shortcutsModal) {
+        DOM.shortcutsModal.hidden = true;
+      }
+    });
+  }
+
+  // Global Keyboard Navigation
+  window.addEventListener("keydown", (e) => {
+    const isInput = ["INPUT", "SELECT", "TEXTAREA"].includes(document.activeElement?.tagName);
+
+    if (e.key === "Escape") {
+      if (DOM.shortcutsModal && !DOM.shortcutsModal.hidden) {
+        DOM.shortcutsModal.hidden = true;
+        return;
+      }
+      if (state.activePlatform !== "all" || state.searchQuery) {
+        state.activePlatform = "all";
+        state.searchQuery = "";
+        DOM.tableSearch.value = "";
+        DOM.platformFilter.value = "all";
+        updateDashboard();
+        showToast("Reset all platform filters", "info");
+      }
+      return;
+    }
+
+    if (isInput) return;
+
+    if (e.key === "/" || e.key === "?") {
+      e.preventDefault();
+      if (e.key === "?") {
+        if (DOM.shortcutsModal) DOM.shortcutsModal.hidden = false;
+      } else {
+        DOM.tableSearch.focus();
+      }
+    } else if (e.key.toLowerCase() === "t") {
+      e.preventDefault();
+      toggleTheme();
+    } else if (e.key === "1") {
+      document.querySelector('.date-btn[data-period="7d"]')?.click();
+    } else if (e.key === "2") {
+      document.querySelector('.date-btn[data-period="30d"]')?.click();
+    } else if (e.key === "3") {
+      document.querySelector('.date-btn[data-period="90d"]')?.click();
+    } else if (e.key.toLowerCase() === "c") {
+      DOM.tabArena?.click();
+    } else if (e.key.toLowerCase() === "s") {
+      DOM.tabSimulator?.click();
+    }
+  });
+
+  // Hub Tab Switcher
+  DOM.tabArena.addEventListener("click", () => {
+    DOM.tabArena.classList.add("active");
+    DOM.tabArena.setAttribute("aria-selected", "true");
+    DOM.tabSimulator.classList.remove("active");
+    DOM.tabSimulator.setAttribute("aria-selected", "false");
+    DOM.arenaView.hidden = false;
+    DOM.simulatorView.hidden = true;
+    state.activeHubTab = "arena";
+    renderArena();
+  });
+
+  DOM.tabSimulator.addEventListener("click", () => {
+    DOM.tabSimulator.classList.add("active");
+    DOM.tabSimulator.setAttribute("aria-selected", "true");
+    DOM.tabArena.classList.remove("active");
+    DOM.tabArena.setAttribute("aria-selected", "false");
+    DOM.arenaView.hidden = true;
+    DOM.simulatorView.hidden = false;
+    state.activeHubTab = "simulator";
+    renderSimulator();
+  });
+
+  // Arena platform selectors & swap
+  DOM.arenaPlatformA.addEventListener("change", () => {
+    state.arenaPlatformA = DOM.arenaPlatformA.value;
+    renderArena();
+  });
+
+  DOM.arenaPlatformB.addEventListener("change", () => {
+    state.arenaPlatformB = DOM.arenaPlatformB.value;
+    renderArena();
+  });
+
+  DOM.arenaSwapBtn.addEventListener("click", () => {
+    const temp = state.arenaPlatformA;
+    state.arenaPlatformA = state.arenaPlatformB;
+    state.arenaPlatformB = temp;
+    renderArena();
+    showToast("⇄ Platforms swapped!", "info");
+  });
+
+  // Simulator controls
+  document.querySelectorAll(".preset-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      applySimPreset(btn.dataset.preset);
+    });
+  });
+
+  DOM.simTargetPlatform.addEventListener("change", () => {
+    state.simTargetPlatform = DOM.simTargetPlatform.value;
+    renderSimulator();
+  });
+
+  DOM.simPostSlider.addEventListener("input", () => {
+    state.simPostFactor = parseFloat(DOM.simPostSlider.value);
+    state.simPreset = "custom";
+    document.querySelectorAll(".preset-btn").forEach((b) =>
+      b.classList.toggle("active", b.dataset.preset === "custom")
+    );
+    renderSimulator();
+  });
+
+  DOM.simBoostSlider.addEventListener("input", () => {
+    state.simBoostFactor = parseInt(DOM.simBoostSlider.value, 10);
+    state.simPreset = "custom";
+    document.querySelectorAll(".preset-btn").forEach((b) =>
+      b.classList.toggle("active", b.dataset.preset === "custom")
+    );
+    renderSimulator();
+  });
+
+  DOM.simEngagementSlider.addEventListener("input", () => {
+    state.simEngagementShift = parseInt(DOM.simEngagementSlider.value, 10);
+    state.simPreset = "custom";
+    document.querySelectorAll(".preset-btn").forEach((b) =>
+      b.classList.toggle("active", b.dataset.preset === "custom")
+    );
+    renderSimulator();
+  });
+
+  DOM.simResetBtn.addEventListener("click", () => {
+    applySimPreset("organic");
+    showToast("↺ Simulation parameters reset", "info");
   });
 
   // Bar chart metric toggle
@@ -1187,6 +1768,12 @@ function initEvents() {
       );
       btn.classList.add("active");
       state.metric = btn.dataset.metric;
+
+      // Also highlight matching KPI card
+      document.querySelectorAll(".card--interactive").forEach((c) => {
+        c.classList.toggle("active", c.dataset.metric === state.metric);
+      });
+
       renderBarChart(getDisplayData());
     });
   });
@@ -1238,6 +1825,7 @@ function initEvents() {
       renderBarChart(data);
       renderDonutChart();
       renderTrendChart();
+      renderArena();
     }, 220);
   });
 }
