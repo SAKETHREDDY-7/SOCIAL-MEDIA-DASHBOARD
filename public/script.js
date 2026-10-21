@@ -1,4 +1,4 @@
-/* ============================================================
+﻿/* ============================================================
    SOCIAL MEDIA DASHBOARD — script.js
    All features wired. Zero dead code. Zero console errors.
    ============================================================ */
@@ -6,21 +6,26 @@
 /* ── Constants ─────────────────────────────────────────────── */
 
 const PLATFORM_COLORS = {
-  Instagram: "#9e2237",
-  Facebook: "#3B82F6",
-  Twitter: "#00b8d9",
-  LinkedIn: "#7c44ff",
-  TikTok: "#ffb83e",
-  YouTube: "#fc2323",
+  Instagram: "#E1306C",
+  Facebook: "#1877F2",
+  Twitter: "#0284c7",
+  LinkedIn: "#0A66C2",
+  TikTok: "#111827",
+  YouTube: "#EF4444",
 };
 
 const PLATFORM_ICONS = {
-  Instagram: "📸",
-  Facebook: "🟦",
-  Twitter: "🐦",
-  LinkedIn: "💼",
-  TikTok: "🎵",
-  YouTube: "▶️",
+  Instagram: `<svg class="platform-icon-svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>`,
+  Facebook: `<svg class="platform-icon-svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>`,
+  Twitter: `<svg class="platform-icon-svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>`,
+  LinkedIn: `<svg class="platform-icon-svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/></svg>`,
+  TikTok: `<svg class="platform-icon-svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-1.01-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.24 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>`,
+  YouTube: `<svg class="platform-icon-svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>`,
+};
+
+const THEME_ICONS = {
+  light: `<svg class="theme-icon-svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>`,
+  dark: `<svg class="theme-icon-svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>`,
 };
 
 const METRIC_LABELS = {
@@ -263,7 +268,7 @@ function getDisplayData() {
 
 function applyTheme(theme) {
   document.documentElement.setAttribute("data-theme", theme);
-  DOM.themeIcon.textContent = theme === "dark" ? "☀️" : "🌙";
+  DOM.themeIcon.innerHTML = theme === "dark" ? THEME_ICONS.light : THEME_ICONS.dark;
   DOM.themeToggle.setAttribute(
     "aria-label",
     theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
@@ -332,7 +337,7 @@ function populateFilter() {
 
   rawData.forEach((d) => {
     const icon = PLATFORM_ICONS[d.platform] || "";
-    const label = `${icon} ${d.platform}`;
+    const label = d.platform;
 
     const opt = document.createElement("option");
     opt.value = d.platform;
@@ -403,9 +408,7 @@ function updateSummary(data) {
   animateCounter(DOM.engagementValue, avgEngagement,   (v) => `${v.toFixed(1)}%`);
 
   const top = [...all].sort((a, b) => b.followers - a.followers)[0];
-  DOM.topPlatformValue.textContent = top
-    ? `${PLATFORM_ICONS[top.platform] || ""} ${top.platform}`
-    : "–";
+  DOM.topPlatformValue.innerHTML = top ? `<span class="leader-badge">${PLATFORM_ICONS[top.platform] || ""} <span>${top.platform}</span></span>` : "–";
 }
 
 /* ── Insight Strip ─────────────────────────────────────────── */
@@ -421,13 +424,13 @@ function updateInsights() {
 
   const icon = (p) => PLATFORM_ICONS[p] || "";
 
-  DOM.bestPerformerValue.textContent    = `${icon(byFollowers.platform)} ${byFollowers.platform}`;
+  DOM.bestPerformerValue.innerHTML = `<span class="insight-platform-val">${icon(byFollowers.platform)} <span>${byFollowers.platform}</span></span>`;
   DOM.bestPerformerMeta.textContent     = `${formatNumber(byFollowers.followers)} followers`;
-  DOM.engagementLeaderValue.textContent = `${icon(byEngagement.platform)} ${byEngagement.platform}`;
+  DOM.engagementLeaderValue.innerHTML = `<span class="insight-platform-val">${icon(byEngagement.platform)} <span>${byEngagement.platform}</span></span>`;
   DOM.engagementLeaderMeta.textContent  = `${byEngagement.engagement.toFixed(1)}% rate`;
-  DOM.likesLeaderValue.textContent      = `${icon(byLikes.platform)} ${byLikes.platform}`;
+  DOM.likesLeaderValue.innerHTML = `<span class="insight-platform-val">${icon(byLikes.platform)} <span>${byLikes.platform}</span></span>`;
   DOM.likesLeaderMeta.textContent       = `${formatNumber(byLikes.likes)} likes`;
-  DOM.reachLeaderValue.textContent      = `${icon(byReach.platform)} ${byReach.platform}`;
+  DOM.reachLeaderValue.innerHTML = `<span class="insight-platform-val">${icon(byReach.platform)} <span>${byReach.platform}</span></span>`;
   DOM.reachLeaderMeta.textContent       = `${formatNumber(byReach.reach)} reached`;
 }
 
@@ -460,8 +463,8 @@ function updateSpotlight() {
 
   const icon = PLATFORM_ICONS[selected.platform] || "";
 
-  DOM.spotlightTitle.textContent = `${icon} ${selected.platform}`;
-  DOM.spotlightDescription.textContent = `Detailed performance for the ${state.period} period.`;
+  DOM.spotlightTitle.innerHTML = `<span class="spotlight-platform-title">${icon} <span>${selected.platform}</span></span>`;
+  DOM.spotlightDescription.textContent = `Performance breakdown for the ${state.period} window.`;
 
   DOM.spotlightFollowers.textContent        = formatNumber(selected.followers);
   DOM.spotlightFollowersContext.textContent = `${fShare.toFixed(1)}% of total followers`;
@@ -573,7 +576,7 @@ function selectPlatform(name) {
   updateDashboard();
   if (name !== "all") {
     const icon = PLATFORM_ICONS[name] || "";
-    showToast(`${icon} Viewing ${name}`, "info");
+    showToast(`Focused on ${name}`, "info");
   }
 }
 
@@ -597,11 +600,11 @@ function syncSortHeaders() {
 
 function syncSortBtn() {
   if (state.sortDir === "desc") {
-    DOM.sortDirectionBtn.textContent = "↓\u00A0Desc";
+    DOM.sortDirectionBtn.innerHTML = `<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>&nbsp;<span>Desc</span>`;
     DOM.sortDirectionBtn.classList.remove("is-asc");
     DOM.sortDirectionBtn.setAttribute("aria-label", "Sort direction: descending — click to switch to ascending");
   } else {
-    DOM.sortDirectionBtn.textContent = "↑\u00A0Asc";
+    DOM.sortDirectionBtn.innerHTML = `<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>&nbsp;<span>Asc</span>`;
     DOM.sortDirectionBtn.classList.add("is-asc");
     DOM.sortDirectionBtn.setAttribute("aria-label", "Sort direction: ascending — click to switch to descending");
   }
@@ -1199,7 +1202,7 @@ function renderTable(data) {
       <td>
         <div class="platform-cell">
           <span class="platform-dot" style="background:${color}"></span>
-          ${icon}&nbsp;${item.platform}
+          <span class="platform-name-cell">${icon}&nbsp;<span>${item.platform}</span></span>
         </div>
       </td>
       <td>${formatNumber(item.followers)}</td>
@@ -1246,7 +1249,7 @@ function exportCSV() {
   a.download = `social-dashboard-${state.period}-${new Date().toISOString().slice(0, 10)}.csv`;
   a.click();
   URL.revokeObjectURL(url);
-  showToast("✅ CSV exported!", "success");
+  showToast("CSV export completed", "success");
 }
 
 /* ── Comparison Arena ──────────────────────────────────────── */
@@ -1264,9 +1267,9 @@ function renderArena() {
   const colorA = PLATFORM_COLORS[platA.platform] || "var(--primary)";
   const colorB = PLATFORM_COLORS[platB.platform] || "#f59e0b";
 
-  DOM.arenaAvatarA.textContent = iconA;
+  DOM.arenaAvatarA.innerHTML = iconA;
   DOM.arenaNameA.textContent = platA.platform;
-  DOM.arenaAvatarB.textContent = iconB;
+  DOM.arenaAvatarB.innerHTML = iconB;
   DOM.arenaNameB.textContent = platB.platform;
 
   DOM.arenaPlatformA.value = platA.platform;
@@ -1346,12 +1349,12 @@ function renderArena() {
     let deltaText = "";
     if (aWins && m.valB > 0) {
       const diff = (((m.valA - m.valB) / m.valB) * 100).toFixed(0);
-      deltaText = `👑 ${platA.platform} (+${diff}%)`;
+      deltaText = `+${diff}% ${platA.platform}`;
     } else if (bWins && m.valA > 0) {
       const diff = (((m.valB - m.valA) / m.valA) * 100).toFixed(0);
-      deltaText = `👑 ${platB.platform} (+${diff}%)`;
+      deltaText = `+${diff}% ${platB.platform}`;
     } else {
-      deltaText = `🤝 Even`;
+      deltaText = `Parity`;
     }
 
     const row = document.createElement("div");
@@ -1369,8 +1372,8 @@ function renderArena() {
     DOM.arenaMatrix.appendChild(row);
   });
 
-  DOM.arenaScoreA.textContent = `${winsA} Metric ${winsA === 1 ? "Win" : "Wins"}`;
-  DOM.arenaScoreB.textContent = `${winsB} Metric ${winsB === 1 ? "Win" : "Wins"}`;
+  DOM.arenaScoreA.textContent = `${winsA} ${winsA === 1 ? "advantage" : "advantages"}`;
+  DOM.arenaScoreB.textContent = `${winsB} ${winsB === 1 ? "advantage" : "advantages"}`;
 
   // Formulate dynamic AI synthesis verdict
   let verdict = "";
@@ -1473,16 +1476,16 @@ function renderSimulator() {
 
   const scopeName = isPortfolio ? "Entire Portfolio" : state.simTargetPlatform;
   if (compositeGrowth >= 35) {
-    DOM.simCalloutHeading.textContent = `🚀 High Velocity Campaign (${scopeName})`;
+    DOM.simCalloutHeading.textContent = `High Velocity Expansion (${scopeName})`;
     DOM.simCalloutBody.textContent = `Aggressive posting cadence (+${((postMult - 1) * 100).toFixed(0)}%) coupled with paid promotion generates massive audience expansion (+${formatNumber(simReach - baseReach)} new reach) with strong viral compounding.`;
   } else if (compositeGrowth >= 10) {
-    DOM.simCalloutHeading.textContent = `🌱 Sustainable Growth Trajectory (${scopeName})`;
+    DOM.simCalloutHeading.textContent = `Sustainable Growth Trajectory (${scopeName})`;
     DOM.simCalloutBody.textContent = `Steady cadence increases create healthy organic velocity, adding ~${formatNumber(simFollowers - baseFollowers)} followers while maintaining stable community engagement.`;
   } else if (compositeGrowth >= 0) {
-    DOM.simCalloutHeading.textContent = `⚖️ Balanced Maintenance Mode (${scopeName})`;
+    DOM.simCalloutHeading.textContent = `Balanced Maintenance Mode (${scopeName})`;
     DOM.simCalloutBody.textContent = `Current simulation preserves existing momentum and minimizes audience fatigue, yielding steady retention across key metrics.`;
   } else {
-    DOM.simCalloutHeading.textContent = `⚠️ Contraction Warning (${scopeName})`;
+    DOM.simCalloutHeading.textContent = `Contraction Risk Detected (${scopeName})`;
     DOM.simCalloutBody.textContent = `Reducing posting cadence and engagement pull-back risks algorithmic distribution drop. Consider keeping cadence above 1.0x to protect audience reach.`;
   }
 }
@@ -1574,7 +1577,7 @@ function initEvents() {
       });
 
       renderBarChart(getDisplayData());
-      showToast(`📊 Plotted ${METRIC_LABELS[metric] || metric} on Bar Chart`, "info");
+      showToast(`Filtered by ${METRIC_LABELS[metric] || metric} on Bar Chart`, "info");
     });
   });
 
@@ -1873,7 +1876,7 @@ function loadData() {
 // Sync theme icon on page load (theme is already applied inline in <head>)
 (function syncThemeIcon() {
   const t = document.documentElement.getAttribute("data-theme") || "light";
-  DOM.themeIcon.textContent = t === "dark" ? "☀️" : "🌙";
+  DOM.themeIcon.innerHTML = t === "dark" ? THEME_ICONS.light : THEME_ICONS.dark;
 })();
 
 showSkeleton();
