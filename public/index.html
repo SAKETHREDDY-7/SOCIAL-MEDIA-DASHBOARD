@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Social Media Dashboard</title>
+    <title>Social Media Performance &amp; Operations Dashboard</title>
 
     <!-- Prevent flash of wrong theme -->
     <script>
@@ -14,7 +14,7 @@
             ? "dark"
             : "light");
         document.documentElement.setAttribute("data-theme", t);
-      })(); 
+      })();
     </script>
 
     <script src="d3.v7.min.js"></script>
@@ -56,7 +56,13 @@
 
     <!-- ── Error Banner ─────────────────────────── -->
     <div id="errorBanner" class="error-banner" hidden>
-      <span class="error-icon" aria-hidden="true">⚠️</span>
+      <span class="error-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+          <line x1="12" x2="12" y1="9" y2="13" />
+          <line x1="12" x2="12.01" y1="17" y2="17" />
+        </svg>
+      </span>
       <div class="error-body">
         <strong>Could not load dashboard data</strong>
         <p>
@@ -72,7 +78,7 @@
       <!-- Header -->
       <header class="topbar">
         <div class="brand">
-          <span class="brand-eyebrow">Overview</span>
+          <span class="brand-eyebrow">Executive Overview</span>
           <h1 class="brand-title">Social Media Dashboard</h1>
         </div>
 
@@ -94,7 +100,15 @@
             aria-label="View keyboard shortcuts"
             title="Keyboard Shortcuts (?)"
           >
-            ⌨️&nbsp;Shortcuts
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect width="20" height="14" x="2" y="5" rx="2" />
+              <line x1="6" x2="6" y1="10" y2="10" />
+              <line x1="10" x2="10" y1="10" y2="10" />
+              <line x1="14" x2="14" y1="10" y2="10" />
+              <line x1="18" x2="18" y1="10" y2="10" />
+              <line x1="8" x2="16" y1="14" y2="14" />
+            </svg>
+            <span>Shortcuts</span>
           </button>
 
           <!-- Dark Mode Toggle -->
@@ -105,7 +119,7 @@
             aria-label="Toggle dark mode"
             title="Toggle dark/light mode (Press T)"
           >
-            <span id="themeIcon">🌙</span>
+            <span id="themeIcon"></span>
           </button>
         </div>
       </header>
@@ -113,38 +127,61 @@
       <!-- ── Summary Cards ─────────────────────── -->
       <section class="stats" aria-label="Summary statistics">
         <article class="card card--interactive active" data-metric="followers" title="Click to view Followers on charts" tabindex="0" role="button">
-          <div class="card-icon" aria-hidden="true">👥</div>
+          <div class="card-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+            </svg>
+          </div>
           <p class="card-label">Total Followers</p>
           <p class="card-value" id="followersValue">–</p>
           <span class="card-hint">Click to plot</span>
         </article>
 
         <article class="card card--interactive" data-metric="likes" title="Click to view Likes on charts" tabindex="0" role="button">
-          <div class="card-icon" aria-hidden="true">❤️</div>
+          <div class="card-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+            </svg>
+          </div>
           <p class="card-label">Total Likes</p>
           <p class="card-value" id="likesValue">–</p>
-
-
           <span class="card-hint">Click to plot</span>
         </article>
 
         <article class="card card--interactive" data-metric="engagement" title="Click to view Engagement on charts" tabindex="0" role="button">
-          <div class="card-icon" aria-hidden="true">📊</div>
+          <div class="card-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+            </svg>
+          </div>
           <p class="card-label">Avg Engagement</p>
           <p class="card-value" id="engagementValue">–</p>
           <span class="card-hint">Click to plot</span>
         </article>
-        
 
         <article class="card card--interactive" data-metric="reach" title="Click to view Reach on charts" tabindex="0" role="button">
-          <div class="card-icon" aria-hidden="true">📡</div>
+          <div class="card-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
+              <path d="M2 12h20" />
+            </svg>
+          </div>
           <p class="card-label">Total Reach</p>
           <p class="card-value" id="reachValue">–</p>
           <span class="card-hint">Click to plot</span>
         </article>
 
         <article class="card" id="topPlatformCard">
-          <div class="card-icon" aria-hidden="true">🏆</div>
+          <div class="card-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="8" r="6" />
+              <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11" />
+            </svg>
+          </div>
           <p class="card-label">Top Platform</p>
           <p class="card-value card-value--sm" id="topPlatformValue">–</p>
           <span class="card-hint">Leader</span>
@@ -154,22 +191,47 @@
       <!-- ── Insights Strip ────────────────────── -->
       <section class="insight-strip" aria-label="Key insights">
         <article class="insight-card">
-          <span class="insight-label">🥇 Best performer</span>
+          <span class="insight-label">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+            </svg>
+            Best Performer
+          </span>
           <strong id="bestPerformerValue">–</strong>
           <small id="bestPerformerMeta">–</small>
         </article>
         <article class="insight-card">
-          <span class="insight-label">📈 Top engagement</span>
+          <span class="insight-label">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
+              <polyline points="16 7 22 7 22 13" />
+            </svg>
+            Top Engagement
+          </span>
           <strong id="engagementLeaderValue">–</strong>
           <small id="engagementLeaderMeta">–</small>
         </article>
         <article class="insight-card">
-          <span class="insight-label">❤️ Most liked</span>
+          <span class="insight-label">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+            </svg>
+            Most Liked
+          </span>
           <strong id="likesLeaderValue">–</strong>
           <small id="likesLeaderMeta">–</small>
         </article>
         <article class="insight-card">
-          <span class="insight-label">📡 Most reach</span>
+          <span class="insight-label">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9" />
+              <path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5" />
+              <circle cx="12" cy="12" r="2" />
+              <path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5" />
+              <path d="M19.1 4.9C23 8.8 23 15.1 19.1 19" />
+            </svg>
+            Highest Reach
+          </span>
           <strong id="reachLeaderValue">–</strong>
           <small id="reachLeaderMeta">–</small>
         </article>
@@ -185,16 +247,19 @@
         <div class="spotlight-heading">
           <div class="spotlight-title-row">
             <div>
-              <p class="eyebrow">Platform spotlight</p>
+              <p class="eyebrow">Platform Focus</p>
               <h2 id="spotlightTitle">Select a platform</h2>
             </div>
             <button id="spotlightClearBtn" class="spotlight-clear-btn" type="button" hidden title="Clear platform selection (Esc)">
-              ✕ Clear Filter
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="18" x2="6" y1="6" y2="18" />
+                <line x1="6" x2="18" y1="6" y2="18" />
+              </svg>
+              <span>Clear Filter</span>
             </button>
           </div>
           <p id="spotlightDescription">
-            Click any bar, donut slice, legend item, or table row to see a
-            detailed breakdown.
+            Select any chart segment, legend item, or table record to inspect unit performance.
           </p>
         </div>
 
@@ -340,22 +405,34 @@
         <div class="panel-header hub-panel-header">
           <div class="hub-header-text">
             <div class="hub-badge-row">
-              <span class="hub-pill">⚡ Interactive Display</span>
-              <span class="hub-pill-sub">Real-Time Analytics & Simulation Lab</span>
+              <span class="hub-pill">Interactive Lab</span>
+              <span class="hub-pill-sub">Comparative Benchmarking &amp; Growth Modeling</span>
             </div>
-            <h2 id="hubMainTitle">Platform Comparison Arena & What-If Simulator</h2>
+            <h2 id="hubMainTitle">Channel Comparison &amp; Growth Simulation</h2>
             <p class="chart-subtitle" id="hubSubtitle">
-              Benchmark platforms head-to-head or simulate campaign growth with reactive mathematical modeling.
+              Benchmark platforms head-to-head across key engagement ratios or forecast multi-channel scaling scenarios.
             </p>
           </div>
 
           <!-- Mode Switcher Tabs -->
           <div class="hub-tabs" role="tablist" aria-label="Interactive display mode">
             <button class="hub-tab active" id="tabArena" data-tab="arena" role="tab" aria-selected="true" type="button">
-              ⚔️ Comparison Arena
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M16 3h5v5" />
+                <path d="M8 3H3v5" />
+                <path d="M12 21v-8" />
+                <path d="m9 7 3 3 3-3" />
+              </svg>
+              <span>Channel Comparison</span>
             </button>
             <button class="hub-tab" id="tabSimulator" data-tab="simulator" role="tab" aria-selected="false" type="button">
-              🚀 What-If Simulator
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="4" x2="20" y1="9" y2="9" />
+                <line x1="4" x2="20" y1="15" y2="15" />
+                <line x1="10" x2="10" y1="3" y2="21" />
+                <line x1="16" x2="16" y1="3" y2="21" />
+              </svg>
+              <span>Growth Simulator</span>
             </button>
           </div>
         </div>
@@ -365,17 +442,23 @@
           <!-- Platform Pickers Bar -->
           <div class="arena-picker-strip">
             <div class="picker-group">
-              <label for="arenaPlatformA" class="picker-label">Platform A</label>
+              <label for="arenaPlatformA" class="picker-label">Channel A</label>
               <select id="arenaPlatformA" class="select picker-select" aria-label="Select first platform">
               </select>
             </div>
 
-            <button id="arenaSwapBtn" class="arena-swap-btn" type="button" title="Swap Platform A and B" aria-label="Swap Platform A and Platform B">
-              ⇄ Swap
+            <button id="arenaSwapBtn" class="arena-swap-btn" type="button" title="Swap channels" aria-label="Swap channels">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="m16 3 4 4-4 4" />
+                <path d="M20 7H4" />
+                <path d="m8 21-4-4 4-4" />
+                <path d="M4 17h16" />
+              </svg>
+              <span>Swap</span>
             </button>
 
             <div class="picker-group">
-              <label for="arenaPlatformB" class="picker-label">Platform B</label>
+              <label for="arenaPlatformB" class="picker-label">Channel B</label>
               <select id="arenaPlatformB" class="select picker-select" aria-label="Select second platform">
               </select>
             </div>
@@ -386,7 +469,7 @@
             <!-- Platform A Card -->
             <div class="arena-side-card" id="arenaCardA">
               <div class="arena-platform-badge" id="arenaBadgeA">
-                <span class="arena-avatar" id="arenaAvatarA">▶️</span>
+                <span class="arena-avatar" id="arenaAvatarA"></span>
                 <div>
                   <h3 class="arena-name" id="arenaNameA">YouTube</h3>
                   <span class="arena-score" id="arenaScoreA">Calculating...</span>
@@ -397,13 +480,13 @@
             <!-- Center VS Callout -->
             <div class="arena-vs-callout">
               <span class="vs-circle">VS</span>
-              <span class="vs-sub">Battle</span>
+              <span class="vs-sub">Benchmark</span>
             </div>
 
             <!-- Platform B Card -->
             <div class="arena-side-card" id="arenaCardB">
               <div class="arena-platform-badge" id="arenaBadgeB">
-                <span class="arena-avatar" id="arenaAvatarB">🎵</span>
+                <span class="arena-avatar" id="arenaAvatarB"></span>
                 <div>
                   <h3 class="arena-name" id="arenaNameB">TikTok</h3>
                   <span class="arena-score" id="arenaScoreB">Calculating...</span>
@@ -417,11 +500,17 @@
             <!-- Dynamically generated rows -->
           </div>
 
-          <!-- Analytical Takeaway / Dynamic AI Synthesis -->
+          <!-- Analytical Takeaway / Dynamic Synthesis -->
           <div class="arena-insight-box" id="arenaInsightBox">
-            <div class="insight-spark-icon">💡</div>
+            <div class="insight-spark-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" x2="12" y1="16" y2="12" />
+                <line x1="12" x2="12.01" y1="8" y2="8" />
+              </svg>
+            </div>
             <div class="insight-spark-body">
-              <strong>Strategic Verdict & Analysis:</strong>
+              <strong>Strategic Assessment &amp; Analysis:</strong>
               <p id="arenaVerdictText">Analyzing comparative performance metrics...</p>
             </div>
           </div>
@@ -433,33 +522,33 @@
             <!-- Left Controls: Parameters & Presets -->
             <div class="sim-controls-pane">
               <div class="sim-section-header">
-                <h3>Scenario Controls</h3>
-                <span class="sim-badge">Live Reactive</span>
+                <h3>Scenario Parameters</h3>
+                <span class="sim-badge">Dynamic Model</span>
               </div>
 
               <!-- Quick Presets -->
               <div class="sim-presets-group">
-                <span class="sim-label">Quick Scenario Presets:</span>
+                <span class="sim-label">Scenario Presets:</span>
                 <div class="sim-presets">
-                  <button type="button" class="preset-btn" data-preset="viral">🔥 Viral Push</button>
-                  <button type="button" class="preset-btn" data-preset="organic">🌱 Steady Organic</button>
-                  <button type="button" class="preset-btn" data-preset="creator">✨ Creator Boost</button>
-                  <button type="button" class="preset-btn active" data-preset="custom">⚙️ Custom</button>
+                  <button type="button" class="preset-btn" data-preset="viral">High Velocity</button>
+                  <button type="button" class="preset-btn" data-preset="organic">Organic Baseline</button>
+                  <button type="button" class="preset-btn" data-preset="creator">Influencer Boost</button>
+                  <button type="button" class="preset-btn active" data-preset="custom">Custom Model</button>
                 </div>
               </div>
 
               <!-- Target Platform Selector -->
               <div class="sim-field">
-                <label for="simTargetPlatform" class="sim-label">Target Platform:</label>
+                <label for="simTargetPlatform" class="sim-label">Target Channel:</label>
                 <select id="simTargetPlatform" class="select" aria-label="Select target platform to simulate">
-                  <option value="all">Entire Portfolio (All Platforms)</option>
+                  <option value="all">Entire Portfolio (All Channels)</option>
                 </select>
               </div>
 
               <!-- Slider 1: Monthly Post Frequency -->
               <div class="sim-slider-field">
                 <div class="slider-header">
-                  <label for="simPostSlider" class="sim-label">Posting Frequency</label>
+                  <label for="simPostSlider" class="sim-label">Publishing Cadence</label>
                   <span class="slider-val-badge" id="simPostBadge">1.5x (+50%)</span>
                 </div>
                 <input type="range" id="simPostSlider" class="sim-range" min="0.5" max="3.0" step="0.1" value="1.5" />
@@ -467,14 +556,14 @@
                   <span>0.5x (Relaxed)</span>
                   <span>1.0x (Current)</span>
                   <span>2.0x (Double)</span>
-                  <span>3.0x (Hyper)</span>
+                  <span>3.0x (Peak)</span>
                 </div>
               </div>
 
               <!-- Slider 2: Paid Promotion / Boost Factor -->
               <div class="sim-slider-field">
                 <div class="slider-header">
-                  <label for="simBoostSlider" class="sim-label">Promotion & Boost Factor</label>
+                  <label for="simBoostSlider" class="sim-label">Paid Amplification Factor</label>
                   <span class="slider-val-badge" id="simBoostBadge">+25% Boost</span>
                 </div>
                 <input type="range" id="simBoostSlider" class="sim-range" min="0" max="100" step="5" value="25" />
@@ -482,27 +571,31 @@
                   <span>0% (Organic)</span>
                   <span>25% (Light)</span>
                   <span>50% (Standard)</span>
-                  <span>100% (Max)</span>
+                  <span>100% (Maximum)</span>
                 </div>
               </div>
 
               <!-- Slider 3: Engagement Quality Shift -->
               <div class="sim-slider-field">
                 <div class="slider-header">
-                  <label for="simEngagementSlider" class="sim-label">Audience Retention Shift</label>
+                  <label for="simEngagementSlider" class="sim-label">Audience Retention Quality</label>
                   <span class="slider-val-badge" id="simEngagementBadge">+10% Quality</span>
                 </div>
                 <input type="range" id="simEngagementSlider" class="sim-range" min="-30" max="50" step="5" value="10" />
                 <div class="slider-ticks">
                   <span>-30% (Fatigue)</span>
-                  <span>0% (Neutral)</span>
-                  <span>+25% (High Viral)</span>
-                  <span>+50% (Peak)</span>
+                  <span>0% (Baseline)</span>
+                  <span>+25% (High Quality)</span>
+                  <span>+50% (Peak Engagement)</span>
                 </div>
               </div>
 
               <button type="button" class="sim-reset-btn" id="simResetBtn">
-                ↺ Reset Parameters
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                  <path d="M3 3v5h5" />
+                </svg>
+                <span>Reset Parameters</span>
               </button>
             </div>
 
@@ -511,7 +604,7 @@
               <div class="sim-results-header">
                 <div>
                   <h3>30-Day Simulated Forecast</h3>
-                  <p class="sim-sub">Projected impact based on selected scenario inputs</p>
+                  <p class="sim-sub">Projected impact based on selected parameter inputs</p>
                 </div>
                 <span class="sim-growth-chip" id="simGrowthChip">+38.2% Growth Index</span>
               </div>
@@ -569,11 +662,17 @@
 
               <!-- Simulation Strategic Summary Note -->
               <div class="sim-summary-callout" id="simCallout">
-                <span class="sim-callout-icon">🎯</span>
+                <span class="sim-callout-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <circle cx="12" cy="12" r="6" />
+                    <circle cx="12" cy="12" r="2" />
+                  </svg>
+                </span>
                 <div class="sim-callout-content">
                   <strong id="simCalloutHeading">Scenario Outlook: High Impact Scaling</strong>
                   <p id="simCalloutBody">
-                    Increasing post frequency combined with targeted promotion is projected to deliver positive lift across all primary metrics.
+                    Increasing publishing cadence combined with targeted promotion is projected to deliver positive lift across all primary metrics.
                   </p>
                 </div>
               </div>
@@ -586,13 +685,13 @@
       <article class="panel panel--full performance-panel">
         <div class="toolbar" role="toolbar" aria-label="Dashboard controls">
           <div class="toolbar-left">
-            <label class="toolbar-label" for="platformFilter">Platform</label>
+            <label class="toolbar-label" for="platformFilter">Channel</label>
             <select
               id="platformFilter"
               class="select"
               aria-label="Filter by platform"
             >
-              <option value="all">All Platforms</option>
+              <option value="all">All Channels</option>
             </select>
 
             <label class="toolbar-label" for="sortMetric">Sort by</label>
@@ -608,25 +707,29 @@
               id="sortDirectionBtn"
               class="sort-btn"
               type="button"
-              aria-label="Toggle sort direction — currently descending"
+              aria-label="Toggle sort direction"
             >
-              ↓&nbsp;Desc
+              <span>Desc</span>
             </button>
           </div>
-
         </div>
 
         <div class="panel-header">
-          <h2>Performance Table</h2>
+          <h2>Channel Performance</h2>
           <div class="table-toolbar">
             <div class="search-box">
-              <span class="search-icon" aria-hidden="true">🔍</span>
+              <span class="search-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8" />
+                  <line x1="21" x2="16.65" y1="21" y2="16.65" />
+                </svg>
+              </span>
               <input
                 id="tableSearch"
                 class="table-search"
                 type="search"
-                placeholder="Search platform…"
-                aria-label="Search platforms in table"
+                placeholder="Search channel..."
+                aria-label="Search channels in table"
                 autocomplete="off"
               />
             </div>
@@ -636,7 +739,12 @@
               type="button"
               aria-label="Export table data to CSV"
             >
-              ⬇&nbsp;Export CSV
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" x2="12" y1="15" y2="3" />
+              </svg>
+              <span>Export CSV</span>
             </button>
           </div>
         </div>
@@ -646,7 +754,7 @@
             <thead>
               <tr>
                 <th class="sortable-th" data-sort="platform" role="columnheader" tabindex="0" title="Click to sort by Platform">
-                  <span>Platform</span><span class="th-sort-icon">↕</span>
+                  <span>Channel</span><span class="th-sort-icon">↕</span>
                 </th>
                 <th class="sortable-th" data-sort="followers" role="columnheader" tabindex="0" title="Click to sort by Followers">
                   <span>Followers</span><span class="th-sort-icon">↕</span>
@@ -668,7 +776,7 @@
             <tbody id="performanceTable"></tbody>
           </table>
           <p id="tableEmptyState" class="table-empty" hidden>
-            No platforms match your search.
+            No channels match your search.
           </p>
         </div>
       </article>
@@ -678,8 +786,23 @@
     <div id="shortcutsModal" class="modal-overlay" hidden role="dialog" aria-modal="true" aria-label="Keyboard Shortcuts">
       <div class="modal-card">
         <div class="modal-header">
-          <h3>⌨️ Keyboard Shortcuts</h3>
-          <button id="closeShortcutsBtn" class="modal-close-btn" type="button" aria-label="Close shortcuts modal">✕</button>
+          <div class="modal-title-wrap">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect width="20" height="14" x="2" y="5" rx="2" />
+              <line x1="6" x2="6" y1="10" y2="10" />
+              <line x1="10" x2="10" y1="10" y2="10" />
+              <line x1="14" x2="14" y1="10" y2="10" />
+              <line x1="18" x2="18" y1="10" y2="10" />
+              <line x1="8" x2="16" y1="14" y2="14" />
+            </svg>
+            <h3>Keyboard Shortcuts</h3>
+          </div>
+          <button id="closeShortcutsBtn" class="modal-close-btn" type="button" aria-label="Close shortcuts modal">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <line x1="18" x2="6" y1="6" y2="18" />
+              <line x1="6" x2="18" y1="6" y2="18" />
+            </svg>
+          </button>
         </div>
         <div class="shortcuts-list">
           <div class="shortcut-row">
@@ -696,7 +819,7 @@
           </div>
           <div class="shortcut-row">
             <kbd>C</kbd>
-            <span>Switch to Comparison Arena</span>
+            <span>Switch to Channel Comparison</span>
           </div>
           <div class="shortcut-row">
             <kbd>S</kbd>
@@ -704,7 +827,7 @@
           </div>
           <div class="shortcut-row">
             <kbd>Esc</kbd>
-            <span>Reset Active Platform / Close Modal</span>
+            <span>Reset Active Channel / Close Modal</span>
           </div>
         </div>
       </div>
