@@ -6,14 +6,13 @@
 /* ── Constants ─────────────────────────────────────────────── */
 
 const PLATFORM_COLORS = {
-  Instagram: "#E1306C",
-  Facebook: "#1877F2",
-  Twitter: "#0284c7",
-  LinkedIn: "#0A66C2",
-  TikTok: "#111827",
-  YouTube: "#EF4444",
+  Instagram: "#C13584", // Magenta
+  Facebook: "#1877F2",  // Blue
+  Twitter: "#1D9BF0",   // Sky blue
+  LinkedIn: "#6A4C93",  // Purple
+  TikTok: "#202124",    // Charcoal
+  YouTube: "#E62117",   // Red
 };
-
 const PLATFORM_ICONS = {
   Instagram: `<svg class="platform-icon-svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>`,
   Facebook: `<svg class="platform-icon-svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>`,
@@ -1467,7 +1466,7 @@ function renderSimulator() {
 
   DOM.simGrowthChip.textContent = `${compositeGrowth >= 0 ? "+" : ""}${compositeGrowth.toFixed(1)}% Growth Index`;
   DOM.simGrowthChip.style.background = compositeGrowth >= 0
-    ? "linear-gradient(135deg, #059669 0%, #10b981 100%)"
+    ? "linear-gradient(135deg, #dff9f2 0%, #b3d7ca 100%)"
     : "linear-gradient(135deg, #dc2626 0%, #ef4444 100%)";
 
   DOM.simPostBadge.textContent = `${postMult.toFixed(1)}x (${postMult >= 1 ? "+" : ""}${((postMult - 1) * 100).toFixed(0)}%)`;
