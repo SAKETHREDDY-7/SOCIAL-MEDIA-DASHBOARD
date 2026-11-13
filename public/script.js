@@ -568,13 +568,27 @@ function clearHighlights() {
   }
 }
 
-function selectPlatform(name) {
+function selectPlatform(name, restoreFocus = false) {
   if (name === state.activePlatform) return; // no-op on same selection
+  const activeElement = document.activeElement;
+  const focusScope = restoreFocus
+    ? activeElement?.closest("#performanceTable, #legend, #barChart, #donutChart")
+    : null;
+  const shouldRestoreFocus =
+    focusScope && activeElement.dataset.platform === name;
+
   state.activePlatform = name;
   DOM.platformFilter.value = name;
   updateDashboard();
+  if (shouldRestoreFocus) {
+    const focusTarget = focusScope
+      ? [...focusScope.querySelectorAll("[data-platform]")].find(
+          (element) => element.dataset.platform === name
+        )
+      : null;
+    (focusTarget || DOM.spotlightClearBtn)?.focus();
+  }
   if (name !== "all") {
-    const icon = PLATFORM_ICONS[name] || "";
     showToast(`Focused on ${name}`, "info");
   }
 }
@@ -608,6 +622,31 @@ function syncSortBtn() {
     DOM.sortDirectionBtn.setAttribute("aria-label", "Sort direction: ascending — click to switch to descending");
   }
   syncSortHeaders();
+}
+
+function syncMetricControls() {
+  document.querySelectorAll(".card--interactive").forEach((card) => {
+    const active = card.dataset.metric === state.metric;
+    card.classList.toggle("active", active);
+    card.setAttribute("aria-pressed", String(active));
+  });
+
+  [DOM.metricToggle, DOM.trendMetricToggle].forEach((group) => {
+    const metric = group === DOM.metricToggle ? state.metric : state.trendMetric;
+    group.querySelectorAll(".metric-btn").forEach((button) => {
+      const active = button.dataset.metric === metric;
+      button.classList.toggle("active", active);
+      button.setAttribute("aria-pressed", String(active));
+    });
+  });
+}
+
+function updateSliderTrack(slider) {
+  const min = Number(slider.min);
+  const max = Number(slider.max);
+  const value = Number(slider.value);
+  const progress = max > min ? ((value - min) / (max - min)) * 100 : 0;
+  slider.style.setProperty("--range-progress", `${progress}%`);
 }
 
 /* ── Bar Chart ─────────────────────────────────────────────── */
@@ -697,6 +736,11 @@ function renderBarChart(data) {
     .enter()
     .append("rect")
     .attr("class", "bar")
+    .attr("data-platform", (d) => d.platform)
+    .attr("role", "button")
+    .attr("tabindex", 0)
+    .attr("aria-label", (d) => `View ${d.platform} performance`)
+    .attr("aria-pressed", (d) => String(d.platform === state.activePlatform))
     .attr("x", (d) => x(d.platform))
     .attr("y", height - margin.bottom)
     .attr("width", x.bandwidth())
@@ -705,8 +749,16 @@ function renderBarChart(data) {
     .attr("fill", (d) => PLATFORM_COLORS[d.platform] || "var(--primary)")
     .on("mousemove", (event, d) => showTooltip(event, platformTooltipHTML(d)))
     .on("mouseenter", (_, d) => highlightPlatform(d.platform))
+    .on("focus", (_, d) => highlightPlatform(d.platform))
     .on("mouseleave", () => { hideTooltip(); clearHighlights(); })
+    .on("blur", clearHighlights)
     .on("click", (_, d) => selectPlatform(d.platform))
+    .on("keydown", (event, d) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        selectPlatform(d.platform, true);
+      }
+    })
     .transition()
     .duration(550)
     .delay((_, i) => i * 55)
@@ -923,6 +975,11 @@ function renderDonutChart() {
     .enter()
     .append("path")
     .attr("class", "donut-slice")
+    .attr("data-platform", (d) => d.data.platform)
+    .attr("role", "button")
+    .attr("tabindex", 0)
+    .attr("aria-label", (d) => `View ${d.data.platform} performance`)
+    .attr("aria-pressed", (d) => String(d.data.platform === state.activePlatform))
     .attr("d", arc)
     .attr("fill", (d) => PLATFORM_COLORS[d.data.platform] || "var(--primary)")
     .attr("stroke", "var(--panel)")
@@ -948,7 +1005,15 @@ function renderDonutChart() {
       hideTooltip();
       clearHighlights();
     })
+    .on("focus", (_, d) => highlightPlatform(d.data.platform))
+    .on("blur", clearHighlights)
     .on("click", (_, d) => selectPlatform(d.data.platform))
+    .on("keydown", (event, d) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        selectPlatform(d.data.platform, true);
+      }
+    })
     .transition()
     .duration(650)
     .delay((_, i) => i * 80)
@@ -967,6 +1032,13 @@ function renderDonutChart() {
     const share = ((item.followers / total) * 100).toFixed(1);
     const li = document.createElement("li");
     li.dataset.platform = item.platform;
+    li.tabIndex = 0;
+    li.setAttribute("role", "button");
+    li.setAttribute("aria-label", `View ${item.platform} performance`);
+    li.setAttribute(
+      "aria-pressed",
+      String(item.platform === state.activePlatform)
+    );
 
     const dot = document.createElement("span");
     dot.className = "legend-dot";
@@ -978,7 +1050,15 @@ function renderDonutChart() {
     li.append(dot, txt);
     li.addEventListener("mouseenter", () => highlightPlatform(item.platform));
     li.addEventListener("mouseleave", clearHighlights);
+    li.addEventListener("focus", () => highlightPlatform(item.platform));
+    li.addEventListener("blur", clearHighlights);
     li.addEventListener("click", () => selectPlatform(item.platform));
+    li.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        selectPlatform(item.platform, true);
+      }
+    });
 
     if (state.activePlatform !== "all") {
       li.classList.toggle("is-active", item.platform === state.activePlatform);
@@ -1219,7 +1299,7 @@ function renderTable(data) {
     row.addEventListener("keydown",    (e) => {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
-        selectPlatform(item.platform);
+        selectPlatform(item.platform, true);
       }
     });
 
@@ -1512,6 +1592,9 @@ function applySimPreset(presetKey) {
   DOM.simPostSlider.value = state.simPostFactor;
   DOM.simBoostSlider.value = state.simBoostFactor;
   DOM.simEngagementSlider.value = state.simEngagementShift;
+  [DOM.simPostSlider, DOM.simBoostSlider, DOM.simEngagementSlider].forEach(
+    updateSliderTrack
+  );
 
   renderSimulator();
 }
@@ -1535,6 +1618,11 @@ function updateDashboard() {
 /* ── Event Listeners ───────────────────────────────────────── */
 
 function initEvents() {
+  syncMetricControls();
+  [DOM.simPostSlider, DOM.simBoostSlider, DOM.simEngagementSlider].forEach(
+    updateSliderTrack
+  );
+
   // Theme
   DOM.themeToggle.addEventListener("click", toggleTheme);
 
@@ -1565,18 +1653,15 @@ function initEvents() {
       const metric = card.dataset.metric;
       if (!metric) return;
       state.metric = metric;
-
-      document.querySelectorAll(".card--interactive").forEach((c) =>
-        c.classList.remove("active")
-      );
-      card.classList.add("active");
-
-      DOM.metricToggle.querySelectorAll(".metric-btn").forEach((btn) => {
-        btn.classList.toggle("active", btn.dataset.metric === metric);
-      });
-
+      syncMetricControls();
       renderBarChart(getDisplayData());
       showToast(`Filtered by ${METRIC_LABELS[metric] || metric} on Bar Chart`, "info");
+    });
+    card.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        card.click();
+      }
     });
   });
 
@@ -1732,6 +1817,7 @@ function initEvents() {
 
   DOM.simPostSlider.addEventListener("input", () => {
     state.simPostFactor = parseFloat(DOM.simPostSlider.value);
+    updateSliderTrack(DOM.simPostSlider);
     state.simPreset = "custom";
     document.querySelectorAll(".preset-btn").forEach((b) =>
       b.classList.toggle("active", b.dataset.preset === "custom")
@@ -1741,6 +1827,7 @@ function initEvents() {
 
   DOM.simBoostSlider.addEventListener("input", () => {
     state.simBoostFactor = parseInt(DOM.simBoostSlider.value, 10);
+    updateSliderTrack(DOM.simBoostSlider);
     state.simPreset = "custom";
     document.querySelectorAll(".preset-btn").forEach((b) =>
       b.classList.toggle("active", b.dataset.preset === "custom")
@@ -1750,6 +1837,7 @@ function initEvents() {
 
   DOM.simEngagementSlider.addEventListener("input", () => {
     state.simEngagementShift = parseInt(DOM.simEngagementSlider.value, 10);
+    updateSliderTrack(DOM.simEngagementSlider);
     state.simPreset = "custom";
     document.querySelectorAll(".preset-btn").forEach((b) =>
       b.classList.toggle("active", b.dataset.preset === "custom")
@@ -1765,17 +1853,8 @@ function initEvents() {
   // Bar chart metric toggle
   DOM.metricToggle.querySelectorAll(".metric-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
-      DOM.metricToggle.querySelectorAll(".metric-btn").forEach((b) =>
-        b.classList.remove("active")
-      );
-      btn.classList.add("active");
       state.metric = btn.dataset.metric;
-
-      // Also highlight matching KPI card
-      document.querySelectorAll(".card--interactive").forEach((c) => {
-        c.classList.toggle("active", c.dataset.metric === state.metric);
-      });
-
+      syncMetricControls();
       renderBarChart(getDisplayData());
     });
   });
@@ -1783,11 +1862,8 @@ function initEvents() {
   // Trend chart metric toggle
   DOM.trendMetricToggle.querySelectorAll(".metric-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
-      DOM.trendMetricToggle.querySelectorAll(".metric-btn").forEach((b) =>
-        b.classList.remove("active")
-      );
-      btn.classList.add("active");
       state.trendMetric = btn.dataset.metric;
+      syncMetricControls();
       renderTrendChart();
     });
   });

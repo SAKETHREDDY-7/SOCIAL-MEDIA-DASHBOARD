@@ -251,12 +251,13 @@ body {
   flex-direction: column;
   justify-content: flex-start;
   align-items: flex-start;
-  transition: border-color var(--t), box-shadow var(--t), background var(--t);
+  transition: border-color var(--t), box-shadow var(--t), background var(--t), transform var(--t);
 }
 
 .card:hover {
   border-color: rgba(37, 99, 235, 0.4);
   box-shadow: var(--shadow);
+  transform: translateY(-2px);
 }
 
 .card-icon {
@@ -315,6 +316,15 @@ body {
   background: var(--panel);
 }
 
+.card--interactive:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+}
+
+.card--interactive:active {
+  transform: scale(0.99);
+}
+
 .card--interactive:hover .card-hint,
 .card--interactive.active .card-hint {
   color: var(--primary);
@@ -350,6 +360,7 @@ body {
 .insight-card:hover {
   border-color: rgba(37, 99, 235, 0.3);
   box-shadow: var(--shadow);
+  transform: translateY(-2px);
 }
 
 .insight-label {
@@ -473,6 +484,12 @@ body {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  transition: transform var(--t), background var(--t);
+}
+
+.spotlight-metric:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .spotlight-metric-label {
@@ -610,6 +627,15 @@ body {
 .legend li:hover {
   background: var(--panel-alt);
   color: var(--primary);
+}
+
+.legend li:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.legend li:active {
+  transform: scale(0.98);
 }
 
 .legend li.is-active {
@@ -1174,9 +1200,21 @@ body {
   width: 100%;
   height: 5px;
   border-radius: 3px;
-  background: var(--border);
+  background: linear-gradient(
+    to right,
+    var(--primary) 0%,
+    var(--primary) var(--range-progress, 0%),
+    var(--border) var(--range-progress, 0%),
+    var(--border) 100%
+  );
   outline: none;
   cursor: pointer;
+  transition: background var(--t);
+}
+
+.sim-range:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 4px;
 }
 
 .sim-range::-webkit-slider-thumb {
@@ -1520,6 +1558,11 @@ thead th {
   color: var(--primary);
 }
 
+.sortable-th:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
+}
+
 .th-sort-icon {
   display: inline-block;
   margin-left: 6px;
@@ -1546,6 +1589,11 @@ tbody td {
 tbody tr {
   cursor: pointer;
   transition: background var(--t);
+}
+
+tbody tr:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
 }
 
 tbody tr:last-child td {
@@ -1647,6 +1695,13 @@ tbody tr.is-selected td:first-child {
 .bar.is-active {
   stroke: rgba(0, 0, 0, 0.2);
   stroke-width: 1.5;
+}
+
+.bar:focus-visible,
+.donut-slice:focus-visible {
+  outline: none;
+  stroke: var(--primary);
+  stroke-width: 3;
 }
 
 .donut-slice {
@@ -2071,5 +2126,16 @@ kbd {
   }
   .skel-cards-row {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
